@@ -545,9 +545,7 @@ export function MarkAbsence() {
                                 {absence.motif || "Aucun motif"}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent className="max-w-xs p-3 bg-gray-800 text-white rounded-lg">
-                              <p>{absence.motif || "Aucun motif spécifié"}</p>
-                            </TooltipContent>
+                            
                           </Tooltip>
                         </TooltipProvider>
                       </TableCell>
@@ -555,48 +553,52 @@ export function MarkAbsence() {
                         <TableCell className="py-4">
                           <div className="flex justify-end">
                            <div className="flex justify-end">
-  <div className="inline-flex rounded-md shadow-sm" role="group">
-    {absence.type === 'non_justifiee' && (
-      <button
-        type="button"
-        onClick={() => handleJustifyAbsence(absence.id)}
-        className="inline-flex items-center px-3 py-1 text-sm font-medium text-green-600 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
-      >
-        <CheckCircle className="h-4 w-4 mr-1" />
-        Justifier
-      </button>
-    )}
-    
-    {absence.statut === 'en_attente' && (
-      <>
-        <button
-          type="button"
-          onClick={() => handleStatusChange(absence.id, 'accepte')}
-          className="inline-flex items-center px-3 py-1 text-sm font-medium text-green-600 bg-white border-t border-b border-gray-200 hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
-        >
-          <CheckCircle className="h-4 w-4 mr-1" />
-          Accepter
-        </button>
-        <button
-          type="button"
-          onClick={() => handleStatusChange(absence.id, 'refuse')}
-          className="inline-flex items-center px-3 py-1 text-sm font-medium text-rose-600 bg-white border-t border-b border-gray-200 hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
-        >
-          <XCircle className="h-4 w-4 mr-1" />
-          Refuser
-        </button>
-      </>
-    )}
-    
-    <button
-      type="button"
-      onClick={() => handleDeleteAbsence(absence.id)}
-      className="inline-flex items-center px-3 py-1 text-sm font-medium text-rose-600 bg-white border border-gray-200 rounded-r-md hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
+ <div className="flex justify-end gap-1">
+  {absence.type === 'non_justifiee' && (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => handleJustifyAbsence(absence.id)}
+      className="h-7 w-7 text-green-600 hover:bg-green-50"
+      title="Justifier l'absence"
     >
-      <Trash2 className="h-4 w-4 mr-1" />
-      Supprimer
-    </button>
-  </div>
+      <CheckCircle className="h-4 w-4" />
+    </Button>
+  )}
+  
+  {absence.statut === 'en_attente' && (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => handleStatusChange(absence.id, 'accepte')}
+        className="h-7 w-7 text-green-600 hover:bg-green-50"
+        title="Accepter l'absence"
+      >
+        <CheckCircle className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => handleStatusChange(absence.id, 'refuse')}
+        className="h-7 w-7 text-rose-600 hover:bg-rose-50"
+        title="Refuser l'absence"
+      >
+        <XCircle className="h-4 w-4" />
+      </Button>
+    </>
+  )}
+  
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={() => handleDeleteAbsence(absence.id)}
+    className="h-7 w-7 text-rose-600 hover:bg-rose-50"
+    title="Supprimer l'absence"
+  >
+    <Trash2 className="h-4 w-4" />
+  </Button>
+</div>
 </div>
                           </div>
                         </TableCell>
