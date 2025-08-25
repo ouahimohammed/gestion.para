@@ -28,7 +28,7 @@ export function MarkAbsence() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('history');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [showEmployeeSelect, setShowEmployeeSelect] = useState(false);
+  const [showEmployeeDialog, setShowEmployeeDialog] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'date_absence', direction: 'desc' });
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export function MarkAbsence() {
 
       // Réinitialiser et actualiser les données
       setSelectedEmployee(null);
-      setShowEmployeeSelect(false);
+      setShowEmployeeDialog(false);
       fetchAbsences();
     } catch (error) {
       console.error('Erreur lors de la soumission:', error);
@@ -247,99 +247,104 @@ export function MarkAbsence() {
         </div>
         
         {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
-          <Dialog open={showEmployeeSelect} onOpenChange={setShowEmployeeSelect}>
-  <DialogTrigger asChild>
-    <Button className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
-      <Plus className="h-4 w-4" /> 
-      Nouvelle absence
-    </Button>
-  </DialogTrigger>
-  <DialogContent className="sm:max-w-md rounded-xl border-0 bg-gradient-to-br from-white to-gray-50 shadow-xl">
-    <DialogHeader className="space-y-2">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 mb-2">
-        <UserCheck className="h-6 w-6 text-indigo-600" />
-      </div>
-      <DialogTitle className="text-xl text-center text-gray-800 font-semibold">
-        Sélectionner un employé
-      </DialogTitle>
-      <DialogDescription className="text-center text-gray-500">
-        Choisissez l'employé pour lequel vous souhaitez enregistrer une absence.
-      </DialogDescription>
-    </DialogHeader>
-    
-    <div className="grid gap-5 py-4">
-      <div className="grid gap-2">
-        <Label htmlFor="employee-select" className="text-sm font-medium text-gray-700">
-          Employé *
-        </Label>
-        <Select onValueChange={(value) => setSelectedEmployee(employees.find(e => e.id === value))}>
-          <SelectTrigger 
-            id="employee-select" 
-            className="w-full h-11 rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-          >
-            <SelectValue placeholder="Sélectionner un employé" />
-          </SelectTrigger>
-          <SelectContent className="rounded-lg border-gray-200 shadow-md">
-            {employees.map(employee => (
-              <SelectItem 
-                key={employee.id} 
-                value={employee.id} 
-                className="rounded-md py-3 focus:bg-indigo-50 focus:text-indigo-700"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <User className="h-4 w-4 text-indigo-600" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-gray-900">{employee.prenom} {employee.nom}</span>
-                    <span className="text-xs text-gray-500">{employee.entreprise}</span>
-                  </div>
+          <Dialog open={showEmployeeDialog} onOpenChange={setShowEmployeeDialog}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                <Plus className="h-4 w-4" /> 
+                Nouvelle absence
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md rounded-xl border-0 bg-gradient-to-br from-white to-gray-50 shadow-xl">
+              <DialogHeader className="space-y-2">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 mb-2">
+                  <UserCheck className="h-6 w-6 text-indigo-600" />
                 </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      {selectedEmployee && (
-        <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200 transition-all duration-300">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-white border border-indigo-200 flex items-center justify-center shadow-sm">
-              <User className="h-5 w-5 text-indigo-600" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900">{selectedEmployee.prenom} {selectedEmployee.nom}</p>
-              <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                <Building2 className="h-3.5 w-3.5" /> 
-                {selectedEmployee.entreprise}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex gap-3 justify-end mt-2">
-        <Button 
-          variant="outline" 
-          onClick={() => {
-            setSelectedEmployee(null);
-            setShowEmployeeSelect(false);
-          }}
-          className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100"
-        >
-          Annuler
-        </Button>
-        <Button 
-          onClick={() => setShowEmployeeSelect(false)} 
-          disabled={!selectedEmployee}
-          className="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          Continuer
-        </Button>
-      </div>
-    </div>
-  </DialogContent>
-</Dialog>
+                <DialogTitle className="text-xl text-center text-gray-800 font-semibold">
+                  Sélectionner un employé
+                </DialogTitle>
+                <DialogDescription className="text-center text-gray-500">
+                  Choisissez l'employé pour lequel vous souhaitez enregistrer une absence.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid gap-5 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="employee-select" className="text-sm font-medium text-gray-700">
+                    Employé *
+                  </Label>
+                  <Select 
+                    onValueChange={(value) => {
+                      const selected = employees.find(e => e.id === value);
+                      setSelectedEmployee(selected);
+                    }}
+                  >
+                    <SelectTrigger 
+                      id="employee-select" 
+                      className="w-full h-11 rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    >
+                      <SelectValue placeholder="Sélectionner un employé" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg border-gray-200 shadow-md">
+                      {employees.map(employee => (
+                        <SelectItem 
+                          key={employee.id} 
+                          value={employee.id} 
+                          className="rounded-md py-3 focus:bg-indigo-50 focus:text-indigo-700"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                              <User className="h-4 w-4 text-indigo-600" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-gray-900">{employee.prenom} {employee.nom}</span>
+                              <span className="text-xs text-gray-500">{employee.entreprise}</span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedEmployee && (
+                  <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200 transition-all duration-300">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-white border border-indigo-200 flex items-center justify-center shadow-sm">
+                        <User className="h-5 w-5 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{selectedEmployee.prenom} {selectedEmployee.nom}</p>
+                        <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                          <Building2 className="h-3.5 w-3.5" /> 
+                          {selectedEmployee.entreprise}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex gap-3 justify-end mt-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSelectedEmployee(null);
+                      setShowEmployeeDialog(false);
+                    }}
+                    className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100"
+                  >
+                    Annuler
+                  </Button>
+                  <Button 
+                    onClick={() => setShowEmployeeDialog(false)} 
+                    disabled={!selectedEmployee}
+                    className="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    Continuer
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -395,9 +400,6 @@ export function MarkAbsence() {
           <p className="text-xs opacity-80 mt-2">Absences non approuvées</p>
         </div>
       </div>
-
-      {/* Header avec actions */}
-      
 
       {/* Formulaire de marquage d'absence */}
       {selectedEmployee && (
@@ -603,7 +605,7 @@ export function MarkAbsence() {
               </p>
               {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
                 <Button 
-                  onClick={() => setShowEmployeeSelect(true)} 
+                  onClick={() => setShowEmployeeDialog(true)} 
                   className="rounded-lg bg-blue-600 hover:bg-blue-700"
                 >
                   <Plus className="h-4 w-4 mr-2" />
