@@ -249,15 +249,15 @@ export function MarkAbsence() {
         {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
 <Dialog open={showEmployeeDialog} onOpenChange={setShowEmployeeDialog}>
   <DialogTrigger asChild>
-    <Button className="gap-2 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
+    <Button className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200 px-4 py-2 rounded-lg font-medium">
       <Plus className="h-4 w-4" /> 
       Nouvelle absence
     </Button>
   </DialogTrigger>
-  <DialogContent className="sm:max-w-lg rounded-xl border-0 bg-white shadow-xl p-0 overflow-hidden">
-    <DialogHeader className="space-y-0 px-6 pt-6 pb-4 bg-gradient-to-r from-blue-50 to-teal-50">
+  <DialogContent className="sm:max-w-md rounded-xl border-0 bg-white shadow-xl p-0 overflow-hidden">
+    <DialogHeader className="space-y-0 px-6 pt-6 pb-4 bg-gradient-to-r from-blue-50 to-blue-100">
       <div className="flex items-center justify-center mb-3">
-        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-white border-2 border-blue-100 shadow-sm">
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-blue-200 shadow-sm">
           <UserCheck className="h-6 w-6 text-blue-600" />
         </div>
       </div>
@@ -270,70 +270,45 @@ export function MarkAbsence() {
     </DialogHeader>
     
     <div className="px-6 pb-6">
-      <div className="grid gap-4 py-4">
+      <div className="grid gap-5 py-4">
         <div className="grid gap-2">
           <Label htmlFor="employee-select" className="text-sm font-medium text-gray-700 flex items-center">
             Employé <span className="text-red-500 ml-1">*</span>
           </Label>
-          <Select 
-            value={selectedEmployee?.id || ""}
-            onValueChange={(value) => {
-              const selected = employees.find(e => e.id === value);
-              setSelectedEmployee(selected);
-            }}
-          >
-            <SelectTrigger 
-              id="employee-select" 
-              className="w-full h-12 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pl-3 pr-3 text-left"
+          
+          {/* Sélecteur natif amélioré avec Tailwind */}
+          <div className="relative">
+            <select
+              id="employee-select"
+              value={selectedEmployee?.id || ""}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                if (selectedId) {
+                  const selected = employees.find(e => e.id === selectedId);
+                  setSelectedEmployee(selected);
+                } else {
+                  setSelectedEmployee(null);
+                }
+              }}
+              className="w-full h-12 pl-4 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white cursor-pointer"
             >
-              <SelectValue placeholder="Sélectionner un employé">
-                {selectedEmployee ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                      <User className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex flex-col text-left">
-                      <span className="font-medium text-gray-900 text-sm">{selectedEmployee.prenom} {selectedEmployee.nom}</span>
-                      <span className="text-xs text-gray-500">{selectedEmployee.entreprise}</span>
-                    </div>
-                  </div>
-                ) : (
-                  "Sélectionner un employé"
-                )}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="rounded-lg border-gray-200 shadow-lg mt-1 max-h-60 overflow-y-auto">
-              {employees.length === 0 ? (
-                <div className="py-6 text-center text-gray-500">
-                  Aucun employé disponible
-                </div>
-              ) : (
-                employees.map(employee => (
-                  <SelectItem 
-                    key={employee.id} 
-                    value={employee.id} 
-                    className="rounded-md py-3 focus:bg-blue-50 focus:text-blue-700"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <User className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{employee.prenom} {employee.nom}</span>
-                        <span className="text-xs text-gray-500">{employee.entreprise}</span>
-                      </div>
-                    </div>
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
+              <option value="">Sélectionner un employé</option>
+              {employees.map(employee => (
+                <option key={employee.id} value={employee.id}>
+                  {employee.prenom} {employee.nom} - {employee.entreprise}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <ChevronDown className="h-5 w-5" />
+            </div>
+          </div>
         </div>
         
         {selectedEmployee && (
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 transition-all duration-300 animate-fadeIn">
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 transition-all duration-300">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white border-2 border-blue-200 flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-white border border-blue-200 flex items-center justify-center shadow-sm">
                 <User className="h-5 w-5 text-blue-600" />
               </div>
               <div>
@@ -342,17 +317,12 @@ export function MarkAbsence() {
                   <Building2 className="h-3.5 w-3.5" /> 
                   {selectedEmployee.entreprise}
                 </p>
-                {selectedEmployee.departement && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Département: {selectedEmployee.departement}
-                  </p>
-                )}
               </div>
             </div>
           </div>
         )}
         
-        <div className="flex gap-3 justify-end pt-2">
+        <div className="flex gap-3 justify-end mt-2">
           <Button 
             variant="outline" 
             onClick={() => {
@@ -366,7 +336,7 @@ export function MarkAbsence() {
           <Button 
             onClick={() => setShowEmployeeDialog(false)} 
             disabled={!selectedEmployee}
-            className="rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 px-4 py-2"
+            className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 px-4 py-2"
           >
             Continuer
           </Button>
