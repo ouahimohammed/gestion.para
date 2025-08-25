@@ -554,50 +554,50 @@ export function MarkAbsence() {
                       {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
                         <TableCell className="py-4">
                           <div className="flex justify-end">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg data-[state=open]:bg-gray-100">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="rounded-lg w-48 p-2 shadow-lg border">
-                                {absence.type === 'non_justifiee' && (
-                                  <DropdownMenuItem 
-                                    onClick={() => handleJustifyAbsence(absence.id)}
-                                    className="flex items-center gap-2 p-2 rounded-md cursor-pointer"
-                                  >
-                                    <CheckCircle className="h-4 w-4 text-green-600" />
-                                    <span>Justifier</span>
-                                  </DropdownMenuItem>
-                                )}
-                                {absence.statut === 'en_attente' && (
-                                  <>
-                                    <DropdownMenuItem 
-                                      onClick={() => handleStatusChange(absence.id, 'accepte')}
-                                      className="flex items-center gap-2 p-2 rounded-md cursor-pointer"
-                                    >
-                                      <CheckCircle className="h-4 w-4 text-green-600" />
-                                      <span>Accepter</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={() => handleStatusChange(absence.id, 'refuse')}
-                                      className="flex items-center gap-2 p-2 rounded-md cursor-pointer text-rose-600"
-                                    >
-                                      <XCircle className="h-4 w-4" />
-                                      <span>Refuser</span>
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                                <div className="h-px bg-gray-200 my-1"></div>
-                                <DropdownMenuItem 
-  onClick={() => handleDeleteAbsence(absence.id)}
-  className="flex items-center gap-2 p-2 rounded-md cursor-pointer text-rose-600"
->
-  <Trash2 className="h-4 w-4" />
-  <span>Supprimer</span>
-</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                           <div className="flex justify-end">
+  <div className="inline-flex rounded-md shadow-sm" role="group">
+    {absence.type === 'non_justifiee' && (
+      <button
+        type="button"
+        onClick={() => handleJustifyAbsence(absence.id)}
+        className="inline-flex items-center px-3 py-1 text-sm font-medium text-green-600 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
+      >
+        <CheckCircle className="h-4 w-4 mr-1" />
+        Justifier
+      </button>
+    )}
+    
+    {absence.statut === 'en_attente' && (
+      <>
+        <button
+          type="button"
+          onClick={() => handleStatusChange(absence.id, 'accepte')}
+          className="inline-flex items-center px-3 py-1 text-sm font-medium text-green-600 bg-white border-t border-b border-gray-200 hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
+        >
+          <CheckCircle className="h-4 w-4 mr-1" />
+          Accepter
+        </button>
+        <button
+          type="button"
+          onClick={() => handleStatusChange(absence.id, 'refuse')}
+          className="inline-flex items-center px-3 py-1 text-sm font-medium text-rose-600 bg-white border-t border-b border-gray-200 hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
+        >
+          <XCircle className="h-4 w-4 mr-1" />
+          Refuser
+        </button>
+      </>
+    )}
+    
+    <button
+      type="button"
+      onClick={() => handleDeleteAbsence(absence.id)}
+      className="inline-flex items-center px-3 py-1 text-sm font-medium text-rose-600 bg-white border border-gray-200 rounded-r-md hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-blue-500"
+    >
+      <Trash2 className="h-4 w-4 mr-1" />
+      Supprimer
+    </button>
+  </div>
+</div>
                           </div>
                         </TableCell>
                       )}
