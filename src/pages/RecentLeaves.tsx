@@ -1,8 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { Calendar, User, Building2, Clock, Eye, MoreHorizontal } from 'lucide-react';
+import { Calendar, User, Building2, Clock, Eye } from 'lucide-react';
 
 interface Leave {
   id: string;
@@ -23,6 +24,16 @@ interface RecentLeavesProps {
 }
 
 export function RecentLeaves({ leaves, userRole, loading }: RecentLeavesProps) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    navigate('/leaves');
+  };
+
+  const handleCreateRequest = () => {
+    navigate('/request-leave');
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'en_attente': { variant: 'warning' as const, label: 'En attente', icon: Clock },
@@ -117,7 +128,7 @@ export function RecentLeaves({ leaves, userRole, loading }: RecentLeavesProps) {
           {getTitle()}
         </CardTitle>
         {leaves.length > 0 && (
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleViewAll}>
             Voir tout
           </Button>
         )}
@@ -194,7 +205,7 @@ export function RecentLeaves({ leaves, userRole, loading }: RecentLeavesProps) {
               }
             </p>
             {userRole === 'employe' && (
-              <Button>
+              <Button onClick={handleCreateRequest}>
                 Faire une demande
               </Button>
             )}
