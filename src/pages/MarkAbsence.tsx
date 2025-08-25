@@ -9,11 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { collection, query, getDocs, where, addDoc, orderBy, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { formatDate, formatDateTime } from '../lib/utils';
-import { Calendar, User, Building2, Clock, CheckCircle, XCircle, Plus, Search, Filter, FileText, CalendarDays, UserCheck, ArrowLeft, Download, MoreVertical } from 'lucide-react';
+import { Calendar, User, Building2, Clock, CheckCircle, XCircle, Plus, Search, Filter, FileText, CalendarDays, UserCheck, ArrowLeft, Download, MoreVertical, ChevronDown, ChevronUp, Eye, Edit, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/Dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/DropdownMenu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/Tooltip';
+import { Label } from '../components/ui/Label';
+import { Textarea } from '../components/ui/Textarea';
 
 export function MarkAbsence() {
   const { userProfile } = useAuth();
@@ -27,6 +29,7 @@ export function MarkAbsence() {
   const [activeTab, setActiveTab] = useState('history');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeeSelect, setShowEmployeeSelect] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'date_absence', direction: 'desc' });
 
   useEffect(() => {
     if (userProfile) {
@@ -162,11 +165,11 @@ export function MarkAbsence() {
   const getStatusBadge = (statut) => {
     switch (statut) {
       case 'en_attente':
-        return <Badge variant="warning" className="flex items-center gap-1"><Clock className="h-3 w-3" />En attente</Badge>;
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1"><Clock className="h-3 w-3" />En attente</Badge>;
       case 'accepte':
-        return <Badge variant="success" className="flex items-center gap-1"><CheckCircle className="h-3 w-3" />Accepté</Badge>;
+        return <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1"><CheckCircle className="h-3 w-3" />Accepté</Badge>;
       case 'refuse':
-        return <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="h-3 w-3" />Refusé</Badge>;
+        return <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 flex items-center gap-1"><XCircle className="h-3 w-3" />Refusé</Badge>;
       default:
         return <Badge variant="secondary">{statut}</Badge>;
     }
@@ -174,16 +177,16 @@ export function MarkAbsence() {
 
   const getTypeBadge = (type) => {
     switch (type) {
-      case 'justifiee': return <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">Justifiée</Badge>;
-      case 'non_justifiee': return <Badge variant="destructive">Non justifiée</Badge>;
+      case 'justifiee': return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Justifiée</Badge>;
+      case 'non_justifiee': return <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200">Non justifiée</Badge>;
       default: return <Badge variant="secondary">{type}</Badge>;
     }
   };
 
   const getDureeBadge = (duree) => {
     switch (duree) {
-      case 'journee': return <Badge variant="outline" className="bg-blue-50 text-blue-700">Journée</Badge>;
-      case 'demi_journee': return <Badge variant="outline" className="bg-purple-50 text-purple-700">Demi-journée</Badge>;
+      case 'journee': return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Journée</Badge>;
+      case 'demi_journee': return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Demi-journée</Badge>;
       default: return <Badge variant="outline">{duree}</Badge>;
     }
   };
@@ -201,15 +204,42 @@ export function MarkAbsence() {
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  // Trier les absences
+  const sortedAbsences = [...filteredAbsences].sort((a, b) => {
+    if (sortConfig.key) {
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+    }
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ChevronDown className="h-4 w-4 opacity-30" />;
+    return sortConfig.direction === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+  };
+
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+    <div className="flex flex-col items-center justify-center h-64 gap-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <p className="text-gray-600">Chargement des données...</p>
     </div>
   );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header avec statistiques */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Gestion des Absences</h1>
@@ -218,76 +248,156 @@ export function MarkAbsence() {
         
         {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
           <Dialog open={showEmployeeSelect} onOpenChange={setShowEmployeeSelect}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" /> 
-                Nouvelle absence
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Sélectionner un employé</DialogTitle>
-                <DialogDescription>
-                  Choisissez l'employé pour lequel vous souhaitez enregistrer une absence.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium">Employé</label>
-                  <Select onValueChange={(value) => setSelectedEmployee(employees.find(e => e.id === value))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un employé" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {employees.map(employee => (
-                        <SelectItem key={employee.id} value={employee.id}>
-                          {employee.prenom} {employee.nom} - {employee.entreprise}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {selectedEmployee && (
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <User className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{selectedEmployee.prenom} {selectedEmployee.nom}</p>
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
-                          <Building2 className="h-3 w-3" /> 
-                          {selectedEmployee.entreprise}
-                        </p>
-                      </div>
-                    </div>
+  <DialogTrigger asChild>
+    <Button className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
+      <Plus className="h-4 w-4" /> 
+      Nouvelle absence
+    </Button>
+  </DialogTrigger>
+  <DialogContent className="sm:max-w-md rounded-xl border-0 bg-gradient-to-br from-white to-gray-50 shadow-xl">
+    <DialogHeader className="space-y-2">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 mb-2">
+        <UserCheck className="h-6 w-6 text-indigo-600" />
+      </div>
+      <DialogTitle className="text-xl text-center text-gray-800 font-semibold">
+        Sélectionner un employé
+      </DialogTitle>
+      <DialogDescription className="text-center text-gray-500">
+        Choisissez l'employé pour lequel vous souhaitez enregistrer une absence.
+      </DialogDescription>
+    </DialogHeader>
+    
+    <div className="grid gap-5 py-4">
+      <div className="grid gap-2">
+        <Label htmlFor="employee-select" className="text-sm font-medium text-gray-700">
+          Employé *
+        </Label>
+        <Select onValueChange={(value) => setSelectedEmployee(employees.find(e => e.id === value))}>
+          <SelectTrigger 
+            id="employee-select" 
+            className="w-full h-11 rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+          >
+            <SelectValue placeholder="Sélectionner un employé" />
+          </SelectTrigger>
+          <SelectContent className="rounded-lg border-gray-200 shadow-md">
+            {employees.map(employee => (
+              <SelectItem 
+                key={employee.id} 
+                value={employee.id} 
+                className="rounded-md py-3 focus:bg-indigo-50 focus:text-indigo-700"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <User className="h-4 w-4 text-indigo-600" />
                   </div>
-                )}
-                
-                <div className="flex gap-2 justify-end mt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSelectedEmployee(null);
-                      setShowEmployeeSelect(false);
-                    }}
-                  >
-                    Annuler
-                  </Button>
-                  <Button 
-                    onClick={() => setShowEmployeeSelect(false)} 
-                    disabled={!selectedEmployee}
-                  >
-                    Continuer
-                  </Button>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900">{employee.prenom} {employee.nom}</span>
+                    <span className="text-xs text-gray-500">{employee.entreprise}</span>
+                  </div>
                 </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {selectedEmployee && (
+        <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200 transition-all duration-300">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-white border border-indigo-200 flex items-center justify-center shadow-sm">
+              <User className="h-5 w-5 text-indigo-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">{selectedEmployee.prenom} {selectedEmployee.nom}</p>
+              <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                <Building2 className="h-3.5 w-3.5" /> 
+                {selectedEmployee.entreprise}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="flex gap-3 justify-end mt-2">
+        <Button 
+          variant="outline" 
+          onClick={() => {
+            setSelectedEmployee(null);
+            setShowEmployeeSelect(false);
+          }}
+          className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100"
+        >
+          Annuler
+        </Button>
+        <Button 
+          onClick={() => setShowEmployeeSelect(false)} 
+          disabled={!selectedEmployee}
+          className="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+        >
+          Continuer
+        </Button>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
         )}
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium">Total des absences</p>
+              <h3 className="text-2xl font-bold mt-1">{absences.length}</h3>
+            </div>
+            <div className="bg-blue-400 p-3 rounded-lg">
+              <CalendarDays className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-xs opacity-80 mt-2">Toutes périodes confondues</p>
+        </div>
+
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium">En attente</p>
+              <h3 className="text-2xl font-bold mt-1">{absences.filter(a => a.statut === 'en_attente').length}</h3>
+            </div>
+            <div className="bg-amber-400 p-3 rounded-lg">
+              <Clock className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-xs opacity-80 mt-2">Requièrent votre attention</p>
+        </div>
+
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium">Acceptées</p>
+              <h3 className="text-2xl font-bold mt-1">{absences.filter(a => a.statut === 'accepte').length}</h3>
+            </div>
+            <div className="bg-emerald-400 p-3 rounded-lg">
+              <CheckCircle className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-xs opacity-80 mt-2">Absences approuvées</p>
+        </div>
+
+        <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium">Refusées</p>
+              <h3 className="text-2xl font-bold mt-1">{absences.filter(a => a.statut === 'refuse').length}</h3>
+            </div>
+            <div className="bg-rose-400 p-3 rounded-lg">
+              <XCircle className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-xs opacity-80 mt-2">Absences non approuvées</p>
+        </div>
+      </div>
+
+      {/* Header avec actions */}
+      
 
       {/* Formulaire de marquage d'absence */}
       {selectedEmployee && (
@@ -300,13 +410,13 @@ export function MarkAbsence() {
       )}
 
       {/* Liste des absences */}
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="rounded-xl overflow-hidden shadow-md">
+        <CardHeader className="pb-3 bg-gray-50">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <CardTitle className="flex items-center gap-2 text-xl">
-              <CalendarDays className="h-5 w-5" />
+              <CalendarDays className="h-5 w-5 text-blue-600" />
               Historique des absences
-              <Badge variant="outline" className="ml-2">{filteredAbsences.length}</Badge>
+              <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">{filteredAbsences.length}</Badge>
             </CardTitle>
             
             <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -314,7 +424,7 @@ export function MarkAbsence() {
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder="Rechercher..."
-                  className="pl-10"
+                  className="pl-10 rounded-lg h-11"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -322,25 +432,28 @@ export function MarkAbsence() {
               
               <div className="flex gap-2">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue placeholder="Statut" />
+                  <SelectTrigger className="w-[130px] rounded-lg h-11">
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      <SelectValue placeholder="Statut" />
+                    </div>
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous statuts</SelectItem>
-                    <SelectItem value="en_attente">En attente</SelectItem>
-                    <SelectItem value="accepte">Accepté</SelectItem>
-                    <SelectItem value="refuse">Refusé</SelectItem>
+                  <SelectContent className="rounded-lg">
+                    <SelectItem value="all" className="rounded-md">Tous statuts</SelectItem>
+                    <SelectItem value="en_attente" className="rounded-md">En attente</SelectItem>
+                    <SelectItem value="accepte" className="rounded-md">Accepté</SelectItem>
+                    <SelectItem value="refuse" className="rounded-md">Refusé</SelectItem>
                   </SelectContent>
                 </Select>
                 
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-[150px] rounded-lg h-11">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous types</SelectItem>
-                    <SelectItem value="justifiee">Justifiée</SelectItem>
-                    <SelectItem value="non_justifiee">Non justifiée</SelectItem>
+                  <SelectContent className="rounded-lg">
+                    <SelectItem value="all" className="rounded-md">Tous types</SelectItem>
+                    <SelectItem value="justifiee" className="rounded-md">Justifiée</SelectItem>
+                    <SelectItem value="non_justifiee" className="rounded-md">Non justifiée</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -348,33 +461,49 @@ export function MarkAbsence() {
           </div>
         </CardHeader>
         
-        <CardContent>
-          {filteredAbsences.length > 0 ? (
-            <div className="rounded-md border">
+        <CardContent className="p-0">
+          {sortedAbsences.length > 0 ? (
+            <div className="rounded-b-xl overflow-hidden">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employé</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Durée</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Motif</TableHead>
+                <TableHeader className="bg-gray-50">
+                  <TableRow className="hover:bg-gray-50">
+                    <TableHead 
+                      className="py-4 font-medium text-gray-700 cursor-pointer"
+                      onClick={() => requestSort('nom_employe')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Employé
+                        {getSortIcon('nom_employe')}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="py-4 font-medium text-gray-700 cursor-pointer"
+                      onClick={() => requestSort('date_absence')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Date
+                        {getSortIcon('date_absence')}
+                      </div>
+                    </TableHead>
+                    <TableHead className="py-4 font-medium text-gray-700">Type</TableHead>
+                    <TableHead className="py-4 font-medium text-gray-700">Durée</TableHead>
+                    <TableHead className="py-4 font-medium text-gray-700">Statut</TableHead>
+                    <TableHead className="py-4 font-medium text-gray-700">Motif</TableHead>
                     {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="py-4 font-medium text-gray-700 text-right">Actions</TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAbsences.map((absence) => (
-                    <TableRow key={absence.id} className="group">
-                      <TableCell>
+                  {sortedAbsences.map((absence) => (
+                    <TableRow key={absence.id} className="group border-b hover:bg-gray-50/50 transition-colors">
+                      <TableCell className="py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                            <User className="h-4 w-4 text-gray-600" />
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                            <User className="h-5 w-5 text-blue-600" />
                           </div>
                           <div>
-                            <div className="font-medium">{absence.prenom_employe} {absence.nom_employe}</div>
+                            <div className="font-medium text-gray-900">{absence.prenom_employe} {absence.nom_employe}</div>
                             <div className="text-xs text-gray-500 flex items-center gap-1">
                               <Building2 className="h-3 w-3" />
                               {absence.entreprise}
@@ -382,60 +511,74 @@ export function MarkAbsence() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{formatDate(absence.date_absence)}</div>
+                      <TableCell className="py-4">
+                        <div className="font-medium text-gray-900">{formatDate(absence.date_absence)}</div>
                         <div className="text-xs text-gray-500">
                           {formatDateTime(absence.created_at)}
                         </div>
                       </TableCell>
-                      <TableCell>{getTypeBadge(absence.type)}</TableCell>
-                      <TableCell>{getDureeBadge(absence.duree)}</TableCell>
-                      <TableCell>{getStatusBadge(absence.statut)}</TableCell>
-                      <TableCell>
+                      <TableCell className="py-4">{getTypeBadge(absence.type)}</TableCell>
+                      <TableCell className="py-4">{getDureeBadge(absence.duree)}</TableCell>
+                      <TableCell className="py-4">{getStatusBadge(absence.statut)}</TableCell>
+                      <TableCell className="py-4">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="max-w-[200px] truncate">
+                              <div className="max-w-[200px] truncate text-gray-700">
                                 {absence.motif || "Aucun motif"}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">{absence.motif || "Aucun motif spécifié"}</p>
+                            <TooltipContent className="max-w-xs p-3 bg-gray-800 text-white rounded-lg">
+                              <p>{absence.motif || "Aucun motif spécifié"}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableCell>
                       {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
-                        <TableCell>
+                        <TableCell className="py-4">
                           <div className="flex justify-end">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg data-[state=open]:bg-gray-100">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent align="end" className="rounded-lg w-48 p-2 shadow-lg border">
+                                <DropdownMenuItem className="flex items-center gap-2 p-2 rounded-md cursor-pointer">
+                                  <Eye className="h-4 w-4" />
+                                  <span>Voir détails</span>
+                                </DropdownMenuItem>
                                 {absence.type === 'non_justifiee' && (
-                                  <DropdownMenuItem onClick={() => handleJustifyAbsence(absence.id)}>
-                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                    Justifier
+                                  <DropdownMenuItem 
+                                    onClick={() => handleJustifyAbsence(absence.id)}
+                                    className="flex items-center gap-2 p-2 rounded-md cursor-pointer"
+                                  >
+                                    <CheckCircle className="h-4 w-4 text-green-600" />
+                                    <span>Justifier</span>
                                   </DropdownMenuItem>
                                 )}
                                 {absence.statut === 'en_attente' && (
                                   <>
-                                    <DropdownMenuItem onClick={() => handleStatusChange(absence.id, 'accepte')}>
-                                      <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                                      Accepter
+                                    <DropdownMenuItem 
+                                      onClick={() => handleStatusChange(absence.id, 'accepte')}
+                                      className="flex items-center gap-2 p-2 rounded-md cursor-pointer"
+                                    >
+                                      <CheckCircle className="h-4 w-4 text-green-600" />
+                                      <span>Accepter</span>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleStatusChange(absence.id, 'refuse')}>
-                                      <XCircle className="h-4 w-4 mr-2 text-red-600" />
-                                      Refuser
+                                    <DropdownMenuItem 
+                                      onClick={() => handleStatusChange(absence.id, 'refuse')}
+                                      className="flex items-center gap-2 p-2 rounded-md cursor-pointer text-rose-600"
+                                    >
+                                      <XCircle className="h-4 w-4" />
+                                      <span>Refuser</span>
                                     </DropdownMenuItem>
                                   </>
                                 )}
-                                <DropdownMenuItem>
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Voir détails
+                                <div className="h-px bg-gray-200 my-1"></div>
+                                <DropdownMenuItem className="flex items-center gap-2 p-2 rounded-md cursor-pointer text-rose-600">
+                                  <Trash2 className="h-4 w-4" />
+                                  <span>Supprimer</span>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -449,15 +592,20 @@ export function MarkAbsence() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <Clock className="h-8 w-8 text-gray-400" />
+              </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune absence trouvée</h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-4 max-w-md mx-auto">
                 {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' 
                   ? "Aucune absence ne correspond à vos critères de recherche." 
                   : "Aucune absence n'a été enregistrée pour le moment."}
               </p>
               {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
-                <Button onClick={() => setShowEmployeeSelect(true)}>
+                <Button 
+                  onClick={() => setShowEmployeeSelect(true)} 
+                  className="rounded-lg bg-blue-600 hover:bg-blue-700"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Marquer une absence
                 </Button>
@@ -485,24 +633,24 @@ function AbsenceForm({ employee, onSubmit, onCancel, submitting }) {
   };
 
   return (
-    <Card className="border-blue-200 bg-blue-50 shadow-md">
-      <CardHeader className="pb-3">
+    <Card className="border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg rounded-xl overflow-hidden">
+      <CardHeader className="pb-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={onCancel} className="h-8 w-8">
+          <Button variant="ghost" size="icon" onClick={onCancel} className="h-8 w-8 text-white hover:bg-blue-500 rounded-full">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <CardTitle className="text-blue-900">Nouvelle absence</CardTitle>
+          <CardTitle className="text-white">Nouvelle absence</CardTitle>
         </div>
       </CardHeader>
       
-      <CardContent>
-        <div className="mb-6 p-3 bg-white rounded-lg border border-blue-200">
+      <CardContent className="pt-6">
+        <div className="mb-6 p-4 bg-white rounded-lg border border-blue-200 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
               <User className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="font-medium">{employee.prenom} {employee.nom}</p>
+              <p className="font-medium text-gray-900">{employee.prenom} {employee.nom}</p>
               <p className="text-sm text-gray-600 flex items-center gap-1">
                 <Building2 className="h-3 w-3" /> 
                 {employee.entreprise}
@@ -513,14 +661,15 @@ function AbsenceForm({ employee, onSubmit, onCancel, submitting }) {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date d'absence *</label>
+            <div className="space-y-2">
+              <Label htmlFor="date_absence" className="text-gray-700">Date d'absence *</Label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                 <Input 
+                  id="date_absence"
                   type="date" 
                   required 
-                  className="pl-10 h-11" 
+                  className="pl-10 h-11 rounded-lg" 
                   value={formData.date_absence} 
                   onChange={(e) => setFormData({ ...formData, date_absence: e.target.value })} 
                   max={new Date().toISOString().split('T')[0]}
@@ -528,47 +677,52 @@ function AbsenceForm({ employee, onSubmit, onCancel, submitting }) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Type d'absence *</label>
+            <div className="space-y-2">
+              <Label htmlFor="type" className="text-gray-700">Type d'absence *</Label>
               <Select 
                 value={formData.type} 
                 onValueChange={(value) => setFormData({ ...formData, type: value })}
               >
-                <SelectTrigger className="h-11">
+                <SelectTrigger id="type" className="h-11 rounded-lg">
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="non_justifiee">Non justifiée</SelectItem>
-                  <SelectItem value="justifiee">Justifiée</SelectItem>
+                <SelectContent className="rounded-lg">
+                  <SelectItem value="non_justifiee" className="rounded-md">Non justifiée</SelectItem>
+                  <SelectItem value="justifiee" className="rounded-md">Justifiée</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Durée *</label>
+            <div className="space-y-2">
+              <Label htmlFor="duree" className="text-gray-700">Durée *</Label>
               <Select 
                 value={formData.duree} 
                 onValueChange={(value) => setFormData({ ...formData, duree: value })}
               >
-                <SelectTrigger className="h-11">
+                <SelectTrigger id="duree" className="h-11 rounded-lg">
                   <SelectValue placeholder="Sélectionner une durée" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="journee">Journée complète</SelectItem>
-                  <SelectItem value="demi_journee">Demi-journée</SelectItem>
+                <SelectContent className="rounded-lg">
+                  <SelectItem value="journee" className="rounded-md">Journée complète</SelectItem>
+                  <SelectItem value="demi_journee" className="rounded-md">Demi-journée</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             {formData.type === 'justifiee' && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Justificatif</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <FileText className="h-8 w-8 text-gray-400" />
-                    <p className="text-sm text-gray-600">Glissez-déposez un fichier ou</p>
-                    <Button variant="outline" size="sm" type="button">
-                      Parcourir
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="justificatif" className="text-gray-700">Justificatif</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Glissez-déposez votre fichier</p>
+                      <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG (max. 10MB)</p>
+                    </div>
+                    <Button variant="outline" size="sm" type="button" className="rounded-lg mt-2">
+                      Parcourir les fichiers
                     </Button>
                   </div>
                 </div>
@@ -576,9 +730,10 @@ function AbsenceForm({ employee, onSubmit, onCancel, submitting }) {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Motif</label>
-            <textarea 
+          <div className="space-y-2">
+            <Label htmlFor="motif" className="text-gray-700">Motif</Label>
+            <Textarea
+              id="motif"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
               rows={3} 
               placeholder="Décrivez le motif de l'absence..." 
@@ -587,11 +742,11 @@ function AbsenceForm({ employee, onSubmit, onCancel, submitting }) {
             />
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-4">
             <Button 
               type="submit" 
               disabled={submitting} 
-              className="flex-1 h-11 gap-2"
+              className="flex-1 h-11 gap-2 rounded-lg bg-blue-600 hover:bg-blue-700"
             >
               {submitting ? (
                 <>
@@ -609,7 +764,7 @@ function AbsenceForm({ employee, onSubmit, onCancel, submitting }) {
               type="button" 
               variant="outline" 
               onClick={onCancel} 
-              className="h-11 px-6"
+              className="h-11 px-6 rounded-lg"
             >
               Annuler
             </Button>
