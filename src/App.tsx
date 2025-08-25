@@ -15,7 +15,7 @@ import { Profile } from './pages/Profile';
 import { Responsables } from './pages/Responsables';
 
 import { ToastProvider } from './components/ui/use-toast';
-import { ProfileAdmin } from './pages/ProfileAdmin ';
+import { ProfileAdmin } from './pages/ProfileAdmin';
 import Login from './pages/Login';
 import { MarkAbsence } from './pages/MarkAbsence';
 import { EmployeeAbsences } from './pages/EmployeeAbsences';
