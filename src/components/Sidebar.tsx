@@ -48,7 +48,7 @@ export function Sidebar() {
     { name: 'Employés', href: '/employees', icon: Users, roles: ['super_admin', 'responsable'] },
     { name: 'Congés', href: '/leaves', icon: Calendar, roles: ['super_admin', 'responsable'] },
     { name: 'Demande de congé', href: '/request-leave', icon: ClipboardList, roles: ['employe'] },
-    { name: 'Planning', href: '/calendar', icon: Calendar, roles: ['super_admin', 'responsable'] },  
+    // { name: 'Planning', href: '/calendar', icon: Calendar, roles: ['super_admin', 'responsable'] },  
     { name: 'Profil', href: '/profile', icon: User, roles: [ 'responsable','employe'] },   
     { name: 'Rapports', href: '/reports', icon: BarChart3, roles: ['super_admin', 'responsable'] },
     { name: 'Absences', href: '/absences', icon: Clock, roles: ['super_admin', 'responsable'] },
