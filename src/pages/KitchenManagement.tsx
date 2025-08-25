@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit, Trash2, Search, Save, X, BarChart3, ShoppingCart, 
@@ -85,11 +86,11 @@ const KitchenManagement: React.FC = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
 
   // États pour les formulaires
-  const [purchaseForm, setPurchaseForm] = useState<Omit<Purchase, 'id' | 'createdAt' | 'categoryName' | 'companyName'>>({
-    companyId: userProfile?.entreprise || '',
+  const [purchaseForm, setPurchaseForm] = useState({
+    companyId: userProfile?.role === 'super_admin' ? '' : userProfile?.entreprise || '',
     itemName: '',
     categoryId: '',
-    quantity: undefined,
+    quantity: undefined as number | undefined,
     unit: '',
     total: 0,
     supplier: '',
@@ -104,9 +105,8 @@ const KitchenManagement: React.FC = () => {
     const initializeData = async () => {
       setLoading(true);
       try {
-        if (userProfile.role === 'super_admin') {
-          await fetchCompanies();
-        }
+        // Toujours charger les entreprises pour pouvoir afficher les noms
+        await fetchCompanies();
         await Promise.all([
           fetchCategories(),
           fetchPurchases()
@@ -209,32 +209,21 @@ const KitchenManagement: React.FC = () => {
       
       if (userProfile?.role === 'super_admin') {
         if (selectedCompany) {
-          // CORRECTION: Filtrer par nom d'entreprise au lieu de l'ID
-          const selectedCompanyObj = companies.find(c => c.id === selectedCompany);
-          if (selectedCompanyObj) {
-            q = query(purchasesQuery, 
-              where('companyId', '==', selectedCompanyObj.nom), // Utiliser le nom de l'entreprise
-              orderBy('date', 'desc')
-            );
-          } else {
-            setPurchases([]);
-            return;
-          }
-        } else {
-          q = query(purchasesQuery, orderBy('date', 'desc'));
-        }
-      } else if (userProfile?.role === 'responsable' && userProfile.entreprise) {
-        // Pour les responsables, utiliser le nom de leur entreprise
-        const userCompany = companies.find(c => c.id === userProfile.entreprise);
-        if (userCompany) {
+          // Pour super admin avec une entreprise sélectionnée
           q = query(purchasesQuery, 
-            where('companyId', '==', userCompany.nom), // Utiliser le nom de l'entreprise
+            where('companyId', '==', selectedCompany),
             orderBy('date', 'desc')
           );
         } else {
-          setPurchases([]);
-          return;
+          // Pour super admin sans filtre d'entreprise
+          q = query(purchasesQuery, orderBy('date', 'desc'));
         }
+      } else if (userProfile?.role === 'responsable' && userProfile.entreprise) {
+        // Pour les responsables, utiliser l'ID de leur entreprise
+        q = query(purchasesQuery, 
+          where('companyId', '==', userProfile.entreprise),
+          orderBy('date', 'desc')
+        );
       } else {
         setPurchases([]);
         return;
@@ -258,10 +247,17 @@ const KitchenManagement: React.FC = () => {
           }
         }
 
-        // Pour le super admin, récupérer le nom de l'entreprise
-        if (userProfile?.role === 'super_admin') {
-          // CORRECTION: companyId contient déjà le nom de l'entreprise
-          purchase.companyName = purchase.companyId;
+        // Récupérer le nom de l'entreprise
+        try {
+          const companyDoc = await getDoc(doc(db, 'entreprises', purchase.companyId));
+          if (companyDoc.exists()) {
+            purchase.companyName = companyDoc.data().nom;
+          } else {
+            purchase.companyName = purchase.companyId; // Fallback
+          }
+        } catch (err) {
+          console.warn('Impossible de récupérer le nom de l\'entreprise:', err);
+          purchase.companyName = purchase.companyId; // Fallback
         }
         
         purchasesData.push(purchase);
@@ -338,9 +334,7 @@ const KitchenManagement: React.FC = () => {
   const handleAddPurchase = () => {
     setEditingItem(null);
     setPurchaseForm({
-      companyId: userProfile?.role === 'super_admin' && selectedCompany 
-        ? selectedCompany 
-        : userProfile?.entreprise || '',
+      companyId: userProfile?.role === 'super_admin' ? '' : userProfile?.entreprise || '',
       itemName: '',
       categoryId: '',
       quantity: undefined,
@@ -394,22 +388,32 @@ const KitchenManagement: React.FC = () => {
     setSaving(true);
 
     try {
-      // CORRECTION: Utiliser le nom de l'entreprise au lieu de l'ID
-      let companyNameForPurchase = '';
-      if (userProfile?.role === 'super_admin' && purchaseForm.companyId) {
-        const selectedCompanyObj = companies.find(c => c.id === purchaseForm.companyId);
-        companyNameForPurchase = selectedCompanyObj ? selectedCompanyObj.nom : '';
-      } else if (userProfile?.role === 'responsable' && userProfile.entreprise) {
-        const userCompany = companies.find(c => c.id === userProfile.entreprise);
-        companyNameForPurchase = userCompany ? userCompany.nom : '';
+      // Déterminer l'ID de l'entreprise pour l'achat
+      let companyIdForPurchase = '';
+      
+      if (userProfile?.role === 'super_admin') {
+        // Pour super admin, utiliser l'entreprise sélectionnée dans le formulaire
+        companyIdForPurchase = purchaseForm.companyId || '';
+      } else if (userProfile?.role === 'responsable') {
+        // Pour responsable, utiliser l'entreprise de son profil
+        companyIdForPurchase = userProfile.entreprise || '';
+      }
+
+      if (!companyIdForPurchase) {
+        toast.error('Erreur: Impossible de déterminer l\'entreprise');
+        return;
       }
 
       const purchaseData = {
-        ...purchaseForm,
-        companyId: companyNameForPurchase, // Stocker le nom de l'entreprise
         itemName: purchaseForm.itemName.trim(),
+        categoryId: purchaseForm.categoryId,
+        quantity: purchaseForm.quantity || null,
+        unit: purchaseForm.unit || '',
+        total: Number(purchaseForm.total),
         supplier: purchaseForm.supplier?.trim() || '',
+        date: purchaseForm.date,
         note: purchaseForm.note?.trim() || '',
+        companyId: companyIdForPurchase,
         updatedAt: new Date().toISOString()
       };
 
@@ -426,7 +430,7 @@ const KitchenManagement: React.FC = () => {
       }
       
       setShowPurchaseModal(false);
-      await fetchPurchases();
+      await Promise.all([fetchPurchases(), fetchCategories()]);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       toast.error('Erreur lors de la sauvegarde de l\'achat');
@@ -1012,7 +1016,6 @@ const KitchenManagement: React.FC = () => {
                         <tr key={purchase.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                           {userProfile?.role === 'super_admin' && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {/* CORRECTION: Utiliser des couleurs différentes pour chaque entreprise */}
                               <span 
                                 className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                                 style={{ 
@@ -1353,7 +1356,7 @@ const KitchenManagement: React.FC = () => {
                   <ul className="text-sm text-gray-600 space-y-1">
                     <li>• Total achats: {filteredPurchases.length}</li>
                     <li>• Montant total: {filteredPurchases.reduce((sum, p) => sum + p.total, 0).toFixed(2)} DH</li>
-                    <li>• Achat moyen: {filteredPurchases.length > 0 ? (filteredPurchases.reduce((sum, p) => sum + p.total, 0) / filteredPurchases.length).toFixed(2) : 0} DH</li>
+                    <li>• Achat moyenne: {filteredPurchases.length > 0 ? (filteredPurchases.reduce((sum, p) => sum + p.total, 0) / filteredPurchases.length).toFixed(2) : 0} DH</li>
                     <li>• Articles différents: {Array.from(new Set(filteredPurchases.map(p => p.itemName))).length}</li>
                   </ul>
                 </div>
@@ -1363,7 +1366,7 @@ const KitchenManagement: React.FC = () => {
                   <ul className="text-sm text-gray-600 space-y-1">
                     <li>• Fournisseurs différents: {Array.from(new Set(filteredPurchases.map(p => p.supplier).filter(Boolean))).length}</li>
                     <li>• Avec fournisseur: {filteredPurchases.filter(p => p.supplier).length}</li>
-                    <li>• Sans fournisseur: {filteredPurchases.filter(p => !p.supplier).length}</li>
+                    <li>• Sans fournisseur: {filteredPurchases.filter(p => !p.supprier).length}</li>
                     <li>• Principal fournisseur: {
                       (() => {
                         const suppliers = filteredPurchases.filter(p => p.supplier).map(p => p.supplier!);
@@ -1534,7 +1537,7 @@ const KitchenManagement: React.FC = () => {
                     Date d'achat *
                   </label>
                   <input
-                                       type="date"
+                    type="date"
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={purchaseForm.date}
@@ -1600,8 +1603,8 @@ const KitchenManagement: React.FC = () => {
           </div>
         </div>
       )}
-
       {/* Modal pour ajouter une catégorie */}
+            {/* Modal pour ajouter une catégorie */}
       {showCategoryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
@@ -1659,4 +1662,4 @@ const KitchenManagement: React.FC = () => {
   );
 };
 
-export default KitchenManagement;
+export default KitchenManagement; 
