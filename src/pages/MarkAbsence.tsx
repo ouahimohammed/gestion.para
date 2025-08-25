@@ -247,104 +247,104 @@ export function MarkAbsence() {
         </div>
         
         {(userProfile?.role === 'super_admin' || userProfile?.role === 'responsable') && (
-<Dialog open={showEmployeeDialog} onOpenChange={setShowEmployeeDialog}>
-  <DialogTrigger asChild>
-    <Button className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200 px-4 py-2 rounded-lg font-medium">
-      <Plus className="h-4 w-4" /> 
-      Nouvelle absence
-    </Button>
-  </DialogTrigger>
-  <DialogContent className="sm:max-w-md rounded-xl border-0 bg-white shadow-xl p-0 overflow-hidden">
-    <DialogHeader className="space-y-0 px-6 pt-6 pb-4 bg-gradient-to-r from-blue-50 to-blue-100">
-      <div className="flex items-center justify-center mb-3">
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-blue-200 shadow-sm">
-          <UserCheck className="h-6 w-6 text-blue-600" />
-        </div>
-      </div>
-      <DialogTitle className="text-xl text-center text-gray-800 font-semibold">
-        Sélectionner un employé
-      </DialogTitle>
-      <DialogDescription className="text-center text-gray-600">
-        Choisissez l'employé pour lequel vous souhaitez enregistrer une absence.
-      </DialogDescription>
-    </DialogHeader>
-    
-    <div className="px-6 pb-6">
-      <div className="grid gap-5 py-4">
-        <div className="grid gap-2">
-          <Label htmlFor="employee-select" className="text-sm font-medium text-gray-700 flex items-center">
-            Employé <span className="text-red-500 ml-1">*</span>
-          </Label>
-          
-          {/* Sélecteur natif amélioré avec Tailwind */}
-          <div className="relative">
-            <select
-              id="employee-select"
-              value={selectedEmployee?.id || ""}
-              onChange={(e) => {
-                const selectedId = e.target.value;
-                if (selectedId) {
-                  const selected = employees.find(e => e.id === selectedId);
-                  setSelectedEmployee(selected);
-                } else {
-                  setSelectedEmployee(null);
-                }
-              }}
-              className="w-full h-12 pl-4 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white cursor-pointer"
-            >
-              <option value="">Sélectionner un employé</option>
-              {employees.map(employee => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.prenom} {employee.nom} - {employee.entreprise}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <ChevronDown className="h-5 w-5" />
-            </div>
-          </div>
-        </div>
-        
-        {selectedEmployee && (
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 transition-all duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white border border-blue-200 flex items-center justify-center shadow-sm">
-                <User className="h-5 w-5 text-blue-600" />
+          <Dialog open={showEmployeeDialog} onOpenChange={setShowEmployeeDialog}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200 px-4 py-2 rounded-lg font-medium">
+                <Plus className="h-4 w-4" /> 
+                Nouvelle absence
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md rounded-xl border-0 bg-white shadow-xl p-0 overflow-hidden">
+              <DialogHeader className="space-y-0 px-6 pt-6 pb-4 bg-gradient-to-r from-blue-50 to-blue-100">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-blue-200 shadow-sm">
+                    <UserCheck className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+                <DialogTitle className="text-xl text-center text-gray-800 font-semibold">
+                  Sélectionner un employé
+                </DialogTitle>
+                <DialogDescription className="text-center text-gray-600">
+                  Choisissez l'employé pour lequel vous souhaitez enregistrer une absence.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="px-6 pb-6">
+                <div className="grid gap-5 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="employee-select" className="text-sm font-medium text-gray-700 flex items-center">
+                      Employé <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    
+                    {/* Sélecteur natif amélioré avec Tailwind */}
+                    <div className="relative">
+                      <select
+                        id="employee-select"
+                        value={selectedEmployee?.id || ""}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          if (selectedId) {
+                            const selected = employees.find(e => e.id === selectedId);
+                            setSelectedEmployee(selected);
+                          } else {
+                            setSelectedEmployee(null);
+                          }
+                        }}
+                        className="w-full h-12 pl-4 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white cursor-pointer"
+                      >
+                        <option value="">Sélectionner un employé</option>
+                        {employees.map(employee => (
+                          <option key={employee.id} value={employee.id}>
+                            {employee.prenom} {employee.nom} - {employee.entreprise}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <ChevronDown className="h-5 w-5" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {selectedEmployee && (
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-white border border-blue-200 flex items-center justify-center shadow-sm">
+                          <User className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{selectedEmployee.prenom} {selectedEmployee.nom}</p>
+                          <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                            <Building2 className="h-3.5 w-3.5" /> 
+                            {selectedEmployee.entreprise}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-3 justify-end mt-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSelectedEmployee(null);
+                        setShowEmployeeDialog(false);
+                      }}
+                      className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2"
+                    >
+                      Annuler
+                    </Button>
+                    <Button 
+                      onClick={() => setShowEmployeeDialog(false)} 
+                      disabled={!selectedEmployee}
+                      className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 px-4 py-2"
+                    >
+                      Continuer
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-gray-900">{selectedEmployee.prenom} {selectedEmployee.nom}</p>
-                <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                  <Building2 className="h-3.5 w-3.5" /> 
-                  {selectedEmployee.entreprise}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <div className="flex gap-3 justify-end mt-2">
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setSelectedEmployee(null);
-              setShowEmployeeDialog(false);
-            }}
-            className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2"
-          >
-            Annuler
-          </Button>
-          <Button 
-            onClick={() => setShowEmployeeDialog(false)} 
-            disabled={!selectedEmployee}
-            className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 px-4 py-2"
-          >
-            Continuer
-          </Button>
-        </div>
-      </div>
-    </div>
-  </DialogContent>
-</Dialog>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -681,34 +681,38 @@ function AbsenceForm({ employee, onSubmit, onCancel, submitting }) {
 
             <div className="space-y-2">
               <Label htmlFor="type" className="text-gray-700">Type d'absence *</Label>
-              <Select 
-                value={formData.type} 
-                onValueChange={(value) => setFormData({ ...formData, type: value })}
-              >
-                <SelectTrigger id="type" className="h-11 rounded-lg">
-                  <SelectValue placeholder="Sélectionner un type" />
-                </SelectTrigger>
-                <SelectContent className="rounded-lg">
-                  <SelectItem value="non_justifiee" className="rounded-md">Non justifiée</SelectItem>
-                  <SelectItem value="justifiee" className="rounded-md">Justifiée</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <select
+                  id="type"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full h-11 pl-4 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white cursor-pointer"
+                >
+                  <option value="non_justifiee">Non justifiée</option>
+                  <option value="justifiee">Justifiée</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <ChevronDown className="h-5 w-5" />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="duree" className="text-gray-700">Durée *</Label>
-              <Select 
-                value={formData.duree} 
-                onValueChange={(value) => setFormData({ ...formData, duree: value })}
-              >
-                <SelectTrigger id="duree" className="h-11 rounded-lg">
-                  <SelectValue placeholder="Sélectionner une durée" />
-                </SelectTrigger>
-                <SelectContent className="rounded-lg">
-                  <SelectItem value="journee" className="rounded-md">Journée complète</SelectItem>
-                  <SelectItem value="demi_journee" className="rounded-md">Demi-journée</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <select
+                  id="duree"
+                  value={formData.duree}
+                  onChange={(e) => setFormData({ ...formData, duree: e.target.value })}
+                  className="w-full h-11 pl-4 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white cursor-pointer"
+                >
+                  <option value="journee">Journée complète</option>
+                  <option value="demi_journee">Demi-journée</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <ChevronDown className="h-5 w-5" />
+                </div>
+              </div>
             </div>
             
             {formData.type === 'justifiee' && (
