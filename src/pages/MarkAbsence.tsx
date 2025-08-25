@@ -6,7 +6,7 @@ import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
-import { collection, query, getDocs, where, addDoc, orderBy, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, getDocs, where, addDoc, orderBy, updateDoc, doc,deleteDoc  } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { formatDate, formatDateTime } from '../lib/utils';
 import { Calendar, User, Building2, Clock, CheckCircle, XCircle, Plus, Search, Filter, FileText, CalendarDays, UserCheck, ArrowLeft, Download, MoreVertical, ChevronDown, ChevronUp, Eye, Edit, Trash2 } from 'lucide-react';
@@ -63,6 +63,21 @@ export function MarkAbsence() {
       console.error('Erreur lors du chargement des employés:', error);
     }
   };
+  const handleDeleteAbsence = async (absenceId) => {
+  if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette absence ?")) {
+    return;
+  }
+  
+  try {
+    await deleteDoc(doc(db, 'absences', absenceId));
+    // Actualiser la liste des absences
+    fetchAbsences();
+    alert("Absence supprimée avec succès");
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error);
+    alert("Erreur lors de la suppression de l'absence");
+  }
+};
 
   const fetchAbsences = async () => {
     if (!userProfile) return;
@@ -578,10 +593,13 @@ export function MarkAbsence() {
                                   </>
                                 )}
                                 <div className="h-px bg-gray-200 my-1"></div>
-                                <DropdownMenuItem className="flex items-center gap-2 p-2 rounded-md cursor-pointer text-rose-600">
-                                  <Trash2 className="h-4 w-4" />
-                                  <span>Supprimer</span>
-                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+  onClick={() => handleDeleteAbsence(absence.id)}
+  className="flex items-center gap-2 p-2 rounded-md cursor-pointer text-rose-600"
+>
+  <Trash2 className="h-4 w-4" />
+  <span>Supprimer</span>
+</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
