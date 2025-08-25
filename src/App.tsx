@@ -30,7 +30,7 @@ import KitchenManagement from './pages/KitchenManagement';
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/employees" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><Employees /></ProtectedRoute>} />
             <Route path="/leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
-            <Route path="/request-leave" element={<ProtectedRoute requiredRole={['employe']}><RequestLeave /></ProtectedRoute>} />
+            <Route path="/request-leave" element={<ProtectedRoute requiredRole={['employe','responsable']}><RequestLeave /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute requiredRole={['employe','responsable']}><Profile /></ProtectedRoute>} />
             <Route path="/profiladmin" element={<ProtectedRoute requiredRole={['super_admin' ]}><ProfileAdmin /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
