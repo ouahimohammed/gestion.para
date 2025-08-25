@@ -561,10 +561,6 @@ export function MarkAbsence() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-lg w-48 p-2 shadow-lg border">
-                                <DropdownMenuItem className="flex items-center gap-2 p-2 rounded-md cursor-pointer">
-                                  <Eye className="h-4 w-4" />
-                                  <span>Voir détails</span>
-                                </DropdownMenuItem>
                                 {absence.type === 'non_justifiee' && (
                                   <DropdownMenuItem 
                                     onClick={() => handleJustifyAbsence(absence.id)}
