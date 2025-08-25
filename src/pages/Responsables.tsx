@@ -375,88 +375,112 @@ export function Responsables() {
       </Card>
 
       {/* Add/Edit Responsable Dialog */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle className="text-xl font-semibold">
-              {editingResponsable ? 'Modifier le responsable' : 'Attribuer un responsable'}
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground mt-1">
-              {editingResponsable 
-                ? 'Modifiez le responsable attribué à cette entreprise' 
-                : 'Sélectionnez un employé existant comme responsable d\'entreprise'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {formError && (
-            <div className="mx-6 mt-4 bg-destructive/15 border border-destructive/50 text-destructive text-sm p-3 rounded-md">
-              {formError}
-            </div>
-          )}
-          
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Sélectionner un employé <span className="text-destructive">*</span>
-                </label>
-                <select
-                  value={selectedEmployee}
-                  onChange={(e) => setSelectedEmployee(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  required
-                >
-                  <option value="">Sélectionner un employé</option>
-                  {employeesLoading ? (
-                    <option value="" disabled>Chargement des employés...</option>
-                  ) : (
-                    employees.map((employee) => (
-                      <option 
-                        key={employee.id} 
-                        value={employee.id}
-                      >
-                        {employee.prenom} {employee.nom} - {employee.email} ({employee.entreprise})
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-
-              {selectedEmployee && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
-                  <p>
-                    <strong>Information :</strong> L'employé sélectionné sera promu au rôle de responsable 
-                    et pourra gérer l'entreprise "{employees.find(e => e.id === selectedEmployee)?.entreprise}".
-                  </p>
-                </div>
+      // Add/Edit Responsable Dialog
+<Dialog open={showForm} onOpenChange={setShowForm}>
+  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 bg-gradient-to-br from-blue-50 to-indigo-50">
+    <DialogHeader className="px-6 pt-6 pb-4 border-b border-blue-200 bg-white rounded-t-lg">
+      <DialogTitle className="text-xl font-semibold text-blue-800">
+        {editingResponsable ? 'Modifier le responsable' : 'Attribuer un responsable'}
+      </DialogTitle>
+      <DialogDescription className="text-sm text-blue-600 mt-1">
+        {editingResponsable 
+          ? 'Modifiez le responsable attribué à cette entreprise' 
+          : 'Sélectionnez un employé existant comme responsable d\'entreprise'}
+      </DialogDescription>
+    </DialogHeader>
+    
+    {formError && (
+      <div className="mx-6 mt-4 bg-red-100 border border-red-300 text-red-700 text-sm p-3 rounded-md flex items-center">
+        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+        {formError}
+      </div>
+    )}
+    
+    <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-white">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-blue-700 leading-none">
+            Sélectionner un employé <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <select
+              value={selectedEmployee}
+              onChange={(e) => setSelectedEmployee(e.target.value)}
+              className="flex h-12 w-full rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              required
+            >
+              <option value="">Sélectionner un employé</option>
+              {employeesLoading ? (
+                <option value="" disabled>Chargement des employés...</option>
+              ) : (
+                employees.map((employee) => (
+                  <option 
+                    key={employee.id} 
+                    value={employee.id}
+                  >
+                    {employee.prenom} {employee.nom} - {employee.email} ({employee.entreprise})
+                  </option>
+                ))
               )}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </div>
-            
-            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingResponsable(null);
-                  setSelectedEmployee('');
-                  setFormError(null);
-                }}
-                className="h-10"
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                className="h-10"
-                disabled={!selectedEmployee}
-              >
-                {editingResponsable ? 'Modifier' : 'Attribuer'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+
+        {selectedEmployee && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 flex items-start">
+            <svg className="w-5 h-5 mr-2 mt-0.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <p>
+              <strong>Information :</strong> L'employé sélectionné sera promu au rôle de responsable 
+              et pourra gérer l'entreprise "{employees.find(e => e.id === selectedEmployee)?.entreprise}".
+            </p>
+          </div>
+        )}
+      </div>
+      
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-gray-200">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setShowForm(false);
+            setEditingResponsable(null);
+            setSelectedEmployee('');
+            setFormError(null);
+          }}
+          className="h-11 border-gray-300 text-gray-700 hover:bg-gray-100"
+        >
+          Annuler
+        </Button>
+        <Button
+          type="submit"
+          className="h-11 bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={!selectedEmployee}
+        >
+          {editingResponsable ? (
+            <>
+              <Edit className="h-4 w-4 mr-2" />
+              Modifier
+            </>
+          ) : (
+            <>
+              <UserCog className="h-4 w-4 mr-2" />
+              Attribuer
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
+  </DialogContent>
+</Dialog>
 
       {/* Responsables List */}
       <Card>
