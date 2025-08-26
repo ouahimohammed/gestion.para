@@ -18,6 +18,9 @@ interface Employee {
   solde_conge: number;
   responsable_id?: string;
   is_super_admin?: boolean;
+  email?: string;
+  telephone?: string;
+  userId?: string;
 }
 
 interface UserProfile {
@@ -25,6 +28,9 @@ interface UserProfile {
   email: string;
   role?: string;
   is_super_admin?: boolean;
+  nom?: string;
+  prenom?: string;
+  entreprise?: string;
 }
 
 interface LeaveStats {
@@ -66,25 +72,38 @@ export function Profile() {
     if (!userProfile?.uid) return;
 
     try {
-      // Try to find employee by matching user ID or email
-      const q = query(collection(db, 'employes'));
+      // Rechercher l'employé par userId dans la collection employes
+      const q = query(
+        collection(db, 'employes'), 
+        where('userId', '==', userProfile.uid)
+      );
       const querySnapshot = await getDocs(q);
       
-      let employeeData = null;
-      querySnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        // You might need to adjust this logic based on how you link users to employees
-        if (data.email === userProfile.email || doc.id === userProfile.uid) {
-          employeeData = { id: doc.id, ...data } as Employee;
-        }
-      });
-
-      if (employeeData) {
+      if (!querySnapshot.empty) {
+        const employeDoc = querySnapshot.docs[0];
+        const employeeData = { id: employeDoc.id, ...employeDoc.data() } as Employee;
         setEmployee(employeeData);
         
         // Fetch manager info if employee has a responsable_id
         if (employeeData.responsable_id) {
           await fetchManagerInfo(employeeData.responsable_id);
+        }
+      } else {
+        // Fallback: essayer de trouver par email si userId n'est pas trouvé
+        const qEmail = query(
+          collection(db, 'employes'), 
+          where('email', '==', userProfile.email)
+        );
+        const emailSnapshot = await getDocs(qEmail);
+        
+        if (!emailSnapshot.empty) {
+          const employeDoc = emailSnapshot.docs[0];
+          const employeeData = { id: employeDoc.id, ...employeDoc.data() } as Employee;
+          setEmployee(employeeData);
+          
+          if (employeeData.responsable_id) {
+            await fetchManagerInfo(employeeData.responsable_id);
+          }
         }
       }
     } catch (error) {
@@ -94,14 +113,34 @@ export function Profile() {
 
   const fetchManagerInfo = async (managerId: string) => {
     try {
+      // Essayer d'abord de trouver le manager par son ID dans employes
       const managerDoc = await getDoc(doc(db, 'employes', managerId));
       if (managerDoc.exists()) {
         const managerData = managerDoc.data();
         setManager({
-          nom: managerData.nom,
-          prenom: managerData.prenom,
-          email: managerData.email,
-          poste: managerData.poste
+          nom: managerData.nom || '',
+          prenom: managerData.prenom || '',
+          email: managerData.email || '',
+          poste: managerData.poste || ''
+        });
+        return;
+      }
+      
+      // Fallback: chercher par userId si l'ID direct ne fonctionne pas
+      const q = query(
+        collection(db, 'employes'), 
+        where('userId', '==', managerId)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const managerDoc = querySnapshot.docs[0];
+        const managerData = managerDoc.data();
+        setManager({
+          nom: managerData.nom || '',
+          prenom: managerData.prenom || '',
+          email: managerData.email || '',
+          poste: managerData.poste || ''
         });
       }
     } catch (error) {
@@ -126,7 +165,7 @@ export function Profile() {
         pending: leaves.filter(l => l.statut === 'en_attente').length,
         approved: leaves.filter(l => l.statut === 'accepte').length,
         rejected: leaves.filter(l => l.statut === 'refuse').length,
-        used: leaves.filter(l => l.statut === 'accepte').length, // Simplified calculation
+        used: leaves.filter(l => l.statut === 'accepte').reduce((sum, leave) => sum + (leave.duree || 0), 0),
       };
 
       setLeaveStats(stats);
@@ -188,7 +227,7 @@ export function Profile() {
                         CIN
                       </label>
                       <div className="text-lg font-semibold text-gray-900">
-                        {employee.cin}
+                        {employee.cin || 'Non renseigné'}
                       </div>
                     </div>
                     
@@ -197,7 +236,7 @@ export function Profile() {
                         Email
                       </label>
                       <div className="text-lg font-semibold text-gray-900">
-                        {userProfile?.email}
+                        {employee.email || userProfile?.email}
                       </div>
                     </div>
                     
@@ -229,7 +268,7 @@ export function Profile() {
                           Date d'embauche
                         </label>
                         <div className="text-lg font-semibold text-gray-900">
-                          {formatDate(employee.date_embauche)}
+                          {employee.date_embauche ? formatDate(employee.date_embauche) : 'Non renseignée'}
                         </div>
                       </div>
                     </div>
@@ -261,14 +300,16 @@ export function Profile() {
                           </div>
                         </div>
                         
-                        <div>
-                          <label className="block text-sm font-medium text-gray-600 mb-1">
-                            Email
-                          </label>
-                          <div className="text-lg font-semibold text-gray-900">
-                            {manager.email}
+                        {manager.email && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-1">
+                              Email
+                            </label>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {manager.email}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   )}
