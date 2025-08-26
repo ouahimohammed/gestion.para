@@ -88,19 +88,36 @@ export function Dashboard() {
   }, [userProfile]);
 
   // Fonction pour récupérer le solde de congé d'un employé
-  const fetchEmployeeLeaveBalance = async (employeeId: string) => {
-    try {
-      const employeeDoc = await getDoc(doc(db, 'employes', employeeId));
-      if (employeeDoc.exists()) {
-        return employeeDoc.data().solde_conge || 0;
-      }
-      return 0;
-    } catch (error) {
-      console.error('Error fetching employee leave balance:', error);
+  const fetchEmployeeLeaveBalance = async (userId: string) => {
+  try {
+    if (!userId) {
+      console.warn('User ID is undefined or empty');
       return 0;
     }
-  };
-
+    
+    // Rechercher l'employé par le champ userId plutôt que par ID de document
+    const employeesQuery = query(
+      collection(db, 'employes'), 
+      where('userId', '==', userId)
+    );
+    const employeesSnapshot = await getDocs(employeesQuery);
+    
+    if (employeesSnapshot.empty) {
+      console.warn(`Employee not found for user ID: ${userId}`);
+      return 0;
+    }
+    
+    // Prendre le premier employé trouvé (normalement il n'y en a qu'un)
+    const employeeData = employeesSnapshot.docs[0].data();
+    const soldeConge = employeeData.solde_conge;
+    
+    return typeof soldeConge === 'number' && !isNaN(soldeConge) ? soldeConge : 0;
+    
+  } catch (error) {
+    console.error('Error fetching employee leave balance:', error);
+    return 0;
+  }
+};
   const fetchSuperAdminData = async () => {
     // Fetch employees
     const employeesQuery = query(collection(db, 'employes'));
@@ -309,17 +326,20 @@ export function Dashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Carte Mon solde de congé - visible pour employés et responsables */}
-          {(userProfile?.role === 'employe' || userProfile?.role === 'responsable') && (
-            <StatsCard
-              title="Mon solde de congé"
-              value={`${userProfile?.role === 'employe' ? stats.leaveBalance || 0 : stats.managerLeaveBalance || 0} jours`}
-              icon={Award}
-              iconColor="text-amber-600"
-              bgColor="bg-amber-50"
-              trend="neutral"
-              trendText="disponibles"
-            />
-          )}
+         {(userProfile?.role === 'employe' || userProfile?.role === 'responsable') && (
+  <StatsCard
+    title="Mon solde de congé"
+    value={`${userProfile?.role === 'employe' 
+      ? (stats.leaveBalance !== undefined ? stats.leaveBalance : 'Chargement...')
+      : (stats.managerLeaveBalance !== undefined ? stats.managerLeaveBalance : 'Chargement...')
+    } jours`}
+    icon={Award}
+    iconColor="text-amber-600"
+    bgColor="bg-amber-50"
+    trend="neutral"
+    trendText="disponibles"
+  />
+)}
           
           {userProfile?.role === 'employe' ? (
             <>
