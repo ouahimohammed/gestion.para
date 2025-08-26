@@ -53,7 +53,7 @@ export function Sidebar() {
     { name: 'Rapports', href: '/reports', icon: BarChart3, roles: ['super_admin', 'responsable'] },
     { name: 'Absences', href: '/absences', icon: Clock, roles: ['super_admin', 'responsable'] },
     { name: 'Entreprises', href: '/companies', icon: Building2, roles: ['super_admin'] },
-    { name: 'Notifications', href: '/notifications', icon: Bell, roles: ['super_admin', 'responsable', 'employe'] },
+    // { name: 'Notifications', href: '/notifications', icon: Bell, roles: ['super_admin', 'responsable', 'employe'] },
     { name: 'Responsables', href: '/responsables', icon: UserCog, roles: [ 'super_admin'] },
     { name: 'Profil', href: '/profiladmin', icon: User, roles: [ 'super_admin' ] },   
     { name: 'Justification', href: '/justification', icon: FileCheck, roles: [ 'employe'] },
