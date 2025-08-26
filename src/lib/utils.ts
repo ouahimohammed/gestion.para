@@ -11,13 +11,13 @@ export function formatDate(date: Date | string | null): string {
   return d.toLocaleDateString('fr-FR');
 }
 
-export function calculateLeaveDays(startDate: string, endDate: string): number {
+ export const calculateLeaveDays = (startDate, endDate) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays + 1;
-}
+  const diffTime = Math.abs(end - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusif
+  return diffDays;
+};
 export function formatDateTime(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
