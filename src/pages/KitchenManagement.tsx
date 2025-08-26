@@ -1106,7 +1106,7 @@ const KitchenManagement: React.FC = () => {
   };
 
   // Vérifier les autorisations
-  if (!['super_admin', 'responsable', 'employee'].includes(userProfile?.role || '')) {
+  if (!['super_admin', 'responsable', 'employe'].includes(userProfile?.role || '')) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-md p-8 text-center max-w-md w-full">
