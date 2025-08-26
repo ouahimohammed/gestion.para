@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { collection, query, getDocs, where, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, where, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { 
   Users, 
@@ -18,7 +18,8 @@ import {
   Plus,
   Eye,
   Filter,
-  Download
+  Download,
+  Award
 } from 'lucide-react';
 import { StatsCard } from './StatsCard';
 import { RecentLeaves } from './RecentLeaves';
@@ -35,6 +36,7 @@ interface DashboardStats {
   leaveBalance?: number;
   thisMonthLeaves?: number;
   lastMonthLeaves?: number;
+  managerLeaveBalance?: number; // Nouveau champ pour le solde du responsable
 }
 
 interface Leave {
@@ -84,6 +86,20 @@ export function Dashboard() {
       fetchDashboardData();
     }
   }, [userProfile]);
+
+  // Fonction pour récupérer le solde de congé d'un employé
+  const fetchEmployeeLeaveBalance = async (employeeId: string) => {
+    try {
+      const employeeDoc = await getDoc(doc(db, 'employes', employeeId));
+      if (employeeDoc.exists()) {
+        return employeeDoc.data().solde_conge || 0;
+      }
+      return 0;
+    } catch (error) {
+      console.error('Error fetching employee leave balance:', error);
+      return 0;
+    }
+  };
 
   const fetchSuperAdminData = async () => {
     // Fetch employees
@@ -165,6 +181,9 @@ export function Dashboard() {
       return leaveDate.getMonth() === currentMonth && leaveDate.getFullYear() === currentYear;
     }).length;
 
+    // Récupérer le solde de congé du responsable
+    const managerLeaveBalance = await fetchEmployeeLeaveBalance(userProfile.uid);
+
     setStats({
       totalEmployees: employeesSnapshot.size,
       totalLeaves: leavesSnapshot.size,
@@ -173,6 +192,7 @@ export function Dashboard() {
       rejectedLeaves: leaves.filter(l => l.statut === 'refuse').length,
       totalCompanies: 1,
       thisMonthLeaves,
+      managerLeaveBalance, // Ajout du solde du responsable
     });
     
     setRecentLeaves(leaves.slice(0, 8));
@@ -199,20 +219,8 @@ export function Dashboard() {
     
     const leaves = leavesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Leave[];
     
-    // Fetch employee profile for leave balance
-    let employeeProfile = null;
-    try {
-      const employeesQuery = query(collection(db, 'employes'));
-      const employeesSnapshot = await getDocs(employeesQuery);
-      employeesSnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        if (data.email === userProfile.email || doc.id === userProfile.uid) {
-          employeeProfile = { id: doc.id, ...data };
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching employee profile:', error);
-    }
+    // Récupérer le solde de congé de l'employé
+    const leaveBalance = await fetchEmployeeLeaveBalance(userProfile.uid);
 
     // Calculate monthly stats
     const currentMonth = new Date().getMonth();
@@ -229,7 +237,7 @@ export function Dashboard() {
       approvedLeaves: leaves.filter(l => l.statut === 'accepte').length,
       rejectedLeaves: leaves.filter(l => l.statut === 'refuse').length,
       totalCompanies: 0,
-      leaveBalance: employeeProfile?.solde_conge || 0,
+      leaveBalance, // Utilisation du solde récupéré
       thisMonthLeaves,
     });
     
@@ -300,17 +308,21 @@ export function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* Carte Mon solde de congé - visible pour employés et responsables */}
+          {(userProfile?.role === 'employe' || userProfile?.role === 'responsable') && (
+            <StatsCard
+              title="Mon solde de congé"
+              value={`${userProfile?.role === 'employe' ? stats.leaveBalance || 0 : stats.managerLeaveBalance || 0} jours`}
+              icon={Award}
+              iconColor="text-amber-600"
+              bgColor="bg-amber-50"
+              trend="neutral"
+              trendText="disponibles"
+            />
+          )}
+          
           {userProfile?.role === 'employe' ? (
             <>
-              <StatsCard
-                title="Solde congés"
-                value={`${stats.leaveBalance || 0} jours`}
-                icon={Calendar}
-                iconColor="text-emerald-600"
-                bgColor="bg-emerald-50"
-                trend={stats.leaveBalance && stats.leaveBalance > 10 ? 'up' : 'down'}
-                trendText="disponibles"
-              />
               <StatsCard
                 title="Mes demandes"
                 value={stats.totalLeaves}
@@ -418,8 +430,6 @@ export function Dashboard() {
             />
           </div>
         </div>
-
-    
       </div>
     </div>
   );
