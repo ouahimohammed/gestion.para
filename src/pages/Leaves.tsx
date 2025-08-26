@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
-import { collection, query, getDocs, where, addDoc, updateDoc, doc, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, where, addDoc, updateDoc, doc, orderBy, runTransaction } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { formatDate, calculateLeaveDays } from '../lib/utils';
 import { Plus, Check, X, FileText, Calendar, User, Filter, Building } from 'lucide-react';
@@ -22,6 +22,7 @@ interface Leave {
   motif: string;
   justificatif?: string;
   created_at: string;
+  duree?: number;
 }
 
 interface Employee {
@@ -29,6 +30,7 @@ interface Employee {
   nom: string;
   prenom: string;
   entreprise: string;
+  solde_conge?: number; // Ajout du solde
 }
 
 interface Company {
@@ -109,35 +111,35 @@ export function Leaves() {
     }
   };
 
-  const fetchEmployees = async () => {
-    try {
-      let q;
-      if (userProfile?.role === 'super_admin') {
-        q = query(collection(db, 'users'), where('role', '==', 'employe'));
-      } else if (userProfile?.role === 'responsable' && userProfile.entreprise) {
-        q = query(
-          collection(db, 'users'),
-          where('role', '==', 'employe'),
-          where('entreprise', '==', userProfile.entreprise)
-        );
-      } else {
-        return;
-      }
-
-      const querySnapshot = await getDocs(q);
-      const employeesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        nom: doc.data().nom || '',
-        prenom: doc.data().prenom || '',
-        entreprise: doc.data().entreprise || ''
-      } as Employee));
-
-      setAllEmployees(employeesData);
-      setFilteredEmployees(employeesData);
-    } catch (error) {
-      console.error('Error fetching employees:', error);
+ const fetchEmployees = async () => {
+  try {
+    let q;
+    if (userProfile?.role === 'super_admin') {
+      q = query(collection(db, 'employes'));
+    } else if (userProfile?.role === 'responsable' && userProfile.entreprise) {
+      q = query(
+        collection(db, 'employes'),
+        where('entreprise', '==', userProfile.entreprise)
+      );
+    } else {
+      return;
     }
-  };
+
+    const querySnapshot = await getDocs(q);
+    const employeesData = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      nom: doc.data().nom || '',
+      prenom: doc.data().prenom || '',
+      entreprise: doc.data().entreprise || '',
+      solde_conge: doc.data().solde_conge || 0
+    } as Employee));
+
+    setAllEmployees(employeesData);
+    setFilteredEmployees(employeesData);
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+  }
+};
 
   const fetchLeaves = async () => {
     try {
@@ -176,51 +178,125 @@ export function Leaves() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userProfile) return;
+  e.preventDefault();
+  if (!userProfile) return;
 
-    try {
-      const leaveData = {
-        employe_id: userProfile.uid,
-        nom_employe: userProfile.nom || '',
-        prenom_employe: userProfile.prenom || '',
-        entreprise: userProfile.entreprise || '',
-        type: formData.type,
-        date_debut: formData.date_debut,
-        date_fin: formData.date_fin,
-        statut: 'en_attente',
-        motif: formData.motif,
-        created_at: new Date().toISOString(),
-      };
-
-      await addDoc(collection(db, 'conges'), leaveData);
+  try {
+    const leaveDays = calculateLeaveDays(formData.date_debut, formData.date_fin);
+    
+    if (formData.type === 'annuel') {
+      // Rechercher l'employé dans la collection employes par userId
+      const q = query(
+        collection(db, 'employes'), 
+        where('userId', '==', userProfile.uid)
+      );
+      const querySnapshot = await getDocs(q);
       
-      setShowForm(false);
-      setFormData({
-        type: 'annuel',
-        date_debut: '',
-        date_fin: '',
-        motif: '',
-      });
-      
-      fetchLeaves();
-    } catch (error) {
-      console.error('Error creating leave request:', error);
+      if (!querySnapshot.empty) {
+        const employeDoc = querySnapshot.docs[0];
+        const employeData = employeDoc.data();
+        const currentBalance = employeData.solde_conge || 0;
+        if (currentBalance < leaveDays) {
+          alert('Solde de congé insuffisant');
+          return;
+        }
+      }
     }
-  };
 
-  const handleStatusUpdate = async (leaveId: string, newStatus: 'accepte' | 'refuse') => {
-    try {
-      await updateDoc(doc(db, 'conges', leaveId), {
+    const leaveData = {
+      employe_id: userProfile.uid,
+      nom_employe: userProfile.nom || '',
+      prenom_employe: userProfile.prenom || '',
+      entreprise: userProfile.entreprise || '',
+      type: formData.type,
+      date_debut: formData.date_debut,
+      date_fin: formData.date_fin,
+      statut: 'en_attente',
+      motif: formData.motif,
+      duree: leaveDays,
+      created_at: new Date().toISOString(),
+    };
+
+    await addDoc(collection(db, 'conges'), leaveData);
+    
+    setShowForm(false);
+    setFormData({
+      type: 'annuel',
+      date_debut: '',
+      date_fin: '',
+      motif: '',
+    });
+    
+    fetchLeaves();
+  } catch (error) {
+    console.error('Error creating leave request:', error);
+  }
+};
+
+ const handleStatusUpdate = async (leaveId: string, newStatus: 'accepte' | 'refuse', leave: Leave) => {
+  try {
+    const leaveDays = leave.duree || calculateLeaveDays(leave.date_debut, leave.date_fin);
+    
+    await runTransaction(db, async (transaction) => {
+      // D'ABORD: Lire tous les documents nécessaires
+      const leaveRef = doc(db, 'conges', leaveId);
+      
+      // Rechercher l'employé dans employes par employe_id (qui est le userId)
+      const q = query(
+        collection(db, 'employes'), 
+        where('userId', '==', leave.employe_id)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        throw new Error("L'employé n'existe pas");
+      }
+      
+      const employeDoc = querySnapshot.docs[0];
+      const employeRef = doc(db, 'employes', employeDoc.id);
+      
+      const leaveDoc = await transaction.get(leaveRef);
+      const employeData = await transaction.get(employeRef);
+      
+      if (!leaveDoc.exists()) {
+        throw new Error("La demande de congé n'existe pas");
+      }
+      
+      const currentStatus = leaveDoc.data().statut;
+      const currentBalance = employeData.data().solde_conge || 0;
+      
+      // ENSUITE: Écrire les modifications
+      transaction.update(leaveRef, {
         statut: newStatus,
         updated_at: new Date().toISOString(),
       });
       
-      fetchLeaves();
-    } catch (error) {
-      console.error('Error updating leave status:', error);
-    }
-  };
+      // Gestion du solde pour les congés annuels
+      if (leave.type === 'annuel') {
+        if (newStatus === 'accepte') {
+          if (currentBalance < leaveDays) {
+            throw new Error("Solde de congé insuffisant");
+          }
+          
+          transaction.update(employeRef, {
+            solde_conge: currentBalance - leaveDays
+          });
+        } 
+        else if (newStatus === 'refuse' && currentStatus === 'accepte') {
+          transaction.update(employeRef, {
+            solde_conge: currentBalance + leaveDays
+          });
+        }
+      }
+    });
+    
+    fetchLeaves();
+    alert(`Demande ${newStatus === 'accepte' ? 'acceptée' : 'refusée'} avec succès`);
+  } catch (error: any) {
+    console.error('Error updating leave status:', error);
+    alert(error.message || 'Erreur lors de la mise à jour du statut');
+  }
+};
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -539,7 +615,7 @@ export function Leaves() {
                               {formatDate(leave.date_debut)} - {formatDate(leave.date_fin)}
                             </div>
                             <div className="text-gray-500">
-                              {calculateLeaveDays(leave.date_debut, leave.date_fin)} jour(s)
+                              {leave.duree || calculateLeaveDays(leave.date_debut, leave.date_fin)} jour(s)
                             </div>
                           </div>
                           
@@ -568,7 +644,7 @@ export function Leaves() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleStatusUpdate(leave.id, 'accepte')}
+                            onClick={() => handleStatusUpdate(leave.id, 'accepte', leave)}
                             className="text-green-600 hover:bg-green-50"
                           >
                             <Check className="h-4 w-4 mr-1" />
@@ -577,7 +653,7 @@ export function Leaves() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleStatusUpdate(leave.id, 'refuse')}
+                            onClick={() => handleStatusUpdate(leave.id, 'refuse', leave)}
                             className="text-red-600 hover:bg-red-50"
                           >
                             <X className="h-4 w-4 mr-1" />
