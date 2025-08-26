@@ -146,11 +146,11 @@ const KitchenManagement: React.FC = () => {
   // Fonction pour déterminer les onglets disponibles selon le rôle et l'entreprise
   const getAvailableTabs = () => {
     const baseTabs = [
-      { key: 'purchases', label: userProfile?.role === 'employee' ? 'Mes Achats' : 'Achats', icon: ShoppingCart }
+      { key: 'purchases', label: userProfile?.role === 'employe' ? 'Mes Achats' : 'Achats', icon: ShoppingCart }
     ];
 
     // Ajouter les onglets produits et catégories seulement pour les entreprises autorisées
-    if (canViewProductsAndCategories() && userProfile?.role !== 'employee') {
+    if (canViewProductsAndCategories() && userProfile?.role !== 'employe') {
       baseTabs.push(
         { key: 'products', label: 'Produits', icon: Package },
         { key: 'categories', label: 'Catégories', icon: Tag },
@@ -241,7 +241,7 @@ const KitchenManagement: React.FC = () => {
           categoriesData.push({ id: doc.id, ...doc.data() } as Category);
         });
         setCategories(categoriesData);
-      } else if (['responsable', 'employee'].includes(userProfile?.role || '') && userProfile?.entreprise) {
+      } else if (['responsable', 'employe'].includes(userProfile?.role || '') && userProfile?.entreprise) {
         const globalCategoriesQuery = query(
           categoriesQuery, 
           where('global', '==', true),
@@ -300,7 +300,7 @@ const KitchenManagement: React.FC = () => {
         } else {
           q = query(productsQuery, orderBy('name'));
         }
-      } else if (['responsable', 'employee'].includes(userProfile?.role || '') && userProfile?.entreprise) {
+      } else if (['responsable', 'employe'].includes(userProfile?.role || '') && userProfile?.entreprise) {
         q = query(productsQuery, 
           where('companyId', '==', userProfile.entreprise),
           orderBy('name')
@@ -354,7 +354,7 @@ const KitchenManagement: React.FC = () => {
         } else {
           q = query(purchasesQuery, orderBy('date', 'desc'));
         }
-      } else if (['responsable', 'employee'].includes(userProfile?.role || '') && userProfile?.entreprise) {
+      } else if (['responsable', 'employe'].includes(userProfile?.role || '') && userProfile?.entreprise) {
         q = query(purchasesQuery, 
           where('companyId', '==', userProfile.entreprise),
           orderBy('date', 'desc')
@@ -408,7 +408,7 @@ const KitchenManagement: React.FC = () => {
 
   // Initialiser les produits prédéfinis (uniquement pour responsable et super_admin des entreprises autorisées)
   const initializeDefaultProducts = async () => {
-    if (!userProfile || userProfile.role === 'employee' || !canViewProductsAndCategories()) {
+    if (!userProfile || userProfile.role === 'employe' || !canViewProductsAndCategories()) {
       toast.error('Action non autorisée pour votre entreprise');
       return;
     }
@@ -488,7 +488,7 @@ const KitchenManagement: React.FC = () => {
 
   // Ajouter une nouvelle catégorie (uniquement pour responsable et super_admin des entreprises autorisées)
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim() || userProfile?.role === 'employee' || !canViewProductsAndCategories()) {
+    if (!newCategoryName.trim() || userProfile?.role === 'employe' || !canViewProductsAndCategories()) {
       toast.error('Action non autorisée ou nom de catégorie manquant');
       return;
     }
@@ -524,7 +524,7 @@ const KitchenManagement: React.FC = () => {
 
   // Supprimer une catégorie (uniquement pour responsable et super_admin des entreprises autorisées)
   const handleDeleteCategory = async (id: string) => {
-    if (userProfile?.role === 'employee' || !canViewProductsAndCategories()) {
+    if (userProfile?.role === 'employe' || !canViewProductsAndCategories()) {
       toast.error('Action non autorisée');
       return;
     }
@@ -553,7 +553,7 @@ const KitchenManagement: React.FC = () => {
 
   // Gestion des produits (uniquement pour responsable et super_admin des entreprises autorisées)
   const handleAddProduct = () => {
-    if (userProfile?.role === 'employee' || !canViewProductsAndCategories()) {
+    if (userProfile?.role === 'employe' || !canViewProductsAndCategories()) {
       toast.error('Action non autorisée pour votre entreprise');
       return;
     }
@@ -568,7 +568,7 @@ const KitchenManagement: React.FC = () => {
   };
 
   const handleEditProduct = (product: Product) => {
-    if (userProfile?.role === 'employee' || !canViewProductsAndCategories()) {
+    if (userProfile?.role === 'employe' || !canViewProductsAndCategories()) {
       toast.error('Action non autorisée pour votre entreprise');
       return;
     }
@@ -583,7 +583,7 @@ const KitchenManagement: React.FC = () => {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (userProfile?.role === 'employee' || !canViewProductsAndCategories()) {
+    if (userProfile?.role === 'employe' || !canViewProductsAndCategories()) {
       toast.error('Action non autorisée');
       return;
     }
@@ -610,7 +610,7 @@ const KitchenManagement: React.FC = () => {
   };
 
   const handleSaveProduct = async () => {
-    if (!productForm.name.trim() || !productForm.categoryId || userProfile?.role === 'employee' || !canViewProductsAndCategories()) {
+    if (!productForm.name.trim() || !productForm.categoryId || userProfile?.role === 'employe' || !canViewProductsAndCategories()) {
       toast.error('Veuillez remplir tous les champs obligatoires ou action non autorisée');
       return;
     }
@@ -683,7 +683,7 @@ const KitchenManagement: React.FC = () => {
 
   const handleEditPurchase = (purchase: Purchase) => {
     // Les employés ne peuvent modifier que leurs propres achats
-    if (userProfile?.role === 'employee' && purchase.createdBy !== userProfile?.userId) {
+    if (userProfile?.role === 'employe' && purchase.createdBy !== userProfile?.userId) {
       toast.error('Vous ne pouvez modifier que vos propres achats');
       return;
     }
@@ -709,7 +709,7 @@ const KitchenManagement: React.FC = () => {
     const purchase = purchases.find(p => p.id === id);
     
     // Les employés ne peuvent supprimer que leurs propres achats
-    if (userProfile?.role === 'employee' && purchase?.createdBy !== userProfile?.userId) {
+    if (userProfile?.role === 'employe' && purchase?.createdBy !== userProfile?.userId) {
       toast.error('Vous ne pouvez supprimer que vos propres achats');
       return;
     }
@@ -742,7 +742,7 @@ const KitchenManagement: React.FC = () => {
       
       if (userProfile?.role === 'super_admin') {
         companyIdForPurchase = purchaseForm.companyId || '';
-      } else if (['responsable', 'employee'].includes(userProfile?.role || '')) {
+      } else if (['responsable', 'employe'].includes(userProfile?.role || '')) {
         companyIdForPurchase = userProfile.entreprise || '';
       }
 
@@ -811,7 +811,7 @@ const KitchenManagement: React.FC = () => {
 
   // Générer un rapport PDF (pas accessible aux employés)
   const generatePDFReport = async () => {
-    if (userProfile?.role === 'employee') {
+    if (userProfile?.role === 'employe') {
       toast.error('Action non autorisée');
       return;
     }
@@ -1131,7 +1131,7 @@ const KitchenManagement: React.FC = () => {
   };
 
   // Vérifier les autorisations
-  if (!['super_admin', 'responsable', 'employee'].includes(userProfile?.role || '')) {
+  if (!['super_admin', 'responsable', 'employe'].includes(userProfile?.role || '')) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-md p-8 text-center max-w-md w-full">
@@ -1213,7 +1213,7 @@ const KitchenManagement: React.FC = () => {
               <div className="flex-shrink-0 flex items-center">
                 <ShoppingCart className="h-8 w-8 text-blue-600" />
                 <span className="ml-2 text-xl font-bold text-gray-900">
-                  {userProfile?.role === 'employee' ? 'Mes Achats Quotidiens' : 'Suivi Achats & Dépenses'}
+                  {userProfile?.role === 'employe' ? 'Mes Achats Quotidiens' : 'Suivi Achats & Dépenses'}
                 </span>
               </div>
               {/* Indicateur d'entreprise autorisée */}
@@ -1264,7 +1264,7 @@ const KitchenManagement: React.FC = () => {
                   </div>
                 )}
 
-                {userProfile?.role !== 'employee' && (
+                {userProfile?.role !== 'employe' && (
                   <button
                     className="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={generatePDFReport}
@@ -1287,7 +1287,7 @@ const KitchenManagement: React.FC = () => {
       </nav>
 
       {/* Message d'information pour les entreprises non autorisées */}
-      {!canViewProductsAndCategories() && userProfile?.role !== 'employee' && (
+      {!canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
         <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mx-4 mt-4 rounded-r-lg">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -1312,9 +1312,9 @@ const KitchenManagement: React.FC = () => {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">
-                  {userProfile?.role === 'employee' ? 'Mes Achats Quotidiens' : 'Gestion des Achats'}
+                  {userProfile?.role === 'employe' ? 'Mes Achats Quotidiens' : 'Gestion des Achats'}
                 </h2>
-                {userProfile?.role === 'employee' && (
+                {userProfile?.role === 'employe' && (
                   <p className="text-gray-600 mt-2">
                     Enregistrez vos achats quotidiens pour votre entreprise
                   </p>
@@ -1376,7 +1376,7 @@ const KitchenManagement: React.FC = () => {
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">{filteredPurchases.length}</p>
                     <p className="text-sm text-gray-600">
-                      {userProfile?.role === 'employee' ? 'Mes achats' : 'Achats'} ({getSelectedPeriodLabel()})
+                      {userProfile?.role === 'employe' ? 'Mes achats' : 'Achats'} ({getSelectedPeriodLabel()})
                     </p>
                   </div>
                 </div>
@@ -1482,7 +1482,7 @@ const KitchenManagement: React.FC = () => {
                             {purchase.note && (
                               <div className="text-xs text-gray-500 truncate max-w-xs">{purchase.note}</div>
                             )}
-                            {userProfile?.role === 'employee' && purchase.createdBy === userProfile?.userId && (
+                            {userProfile?.role === 'employe' && purchase.createdBy === userProfile?.userId && (
                               <div className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
                                 <User className="w-3 h-3 mr-1" />
                                 Mon achat
@@ -1508,7 +1508,7 @@ const KitchenManagement: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center space-x-2">
-                              {(userProfile?.role !== 'employee' || purchase.createdBy === userProfile?.userId) && (
+                              {(userProfile?.role !== 'employe' || purchase.createdBy === userProfile?.userId) && (
                                 <button
                                   className="text-blue-600 hover:text-blue-900 transition-colors"
                                   onClick={() => handleEditPurchase(purchase)}
@@ -1517,7 +1517,7 @@ const KitchenManagement: React.FC = () => {
                                   <Edit size={16} />
                                 </button>
                               )}
-                              {(userProfile?.role !== 'employee' || purchase.createdBy === userProfile?.userId) && (
+                              {(userProfile?.role !== 'employe' || purchase.createdBy === userProfile?.userId) && (
                                 <button
                                   className="text-red-600 hover:text-red-900 transition-colors"
                                   onClick={() => handleDeletePurchase(purchase.id)}
@@ -1551,10 +1551,10 @@ const KitchenManagement: React.FC = () => {
                 <div className="text-center py-12">
                   <ShoppingCart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    {userProfile?.role === 'employee' ? 'Aucun achat enregistré' : 'Aucun achat trouvé'}
+                    {userProfile?.role === 'employe' ? 'Aucun achat enregistré' : 'Aucun achat trouvé'}
                   </h3>
                   <p className="text-gray-500 mb-4">
-                    {userProfile?.role === 'employee' ? 
+                    {userProfile?.role === 'employe' ? 
                       'Commencez par enregistrer votre premier achat quotidien.' :
                       'Commencez par enregistrer vos premiers achats.'
                     }
@@ -1564,7 +1564,7 @@ const KitchenManagement: React.FC = () => {
                     onClick={handleAddPurchase}
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    {userProfile?.role === 'employee' ? 
+                    {userProfile?.role === 'employe' ? 
                       'Ajouter votre premier achat' :
                       'Ajouter votre premier achat'
                     }
@@ -1576,7 +1576,7 @@ const KitchenManagement: React.FC = () => {
         )}
 
         {/* Section Produits (seulement pour les entreprises autorisées et pas accessible aux employés) */}
-        {activeTab === 'products' && canViewProductsAndCategories() && userProfile?.role !== 'employee' && (
+        {activeTab === 'products' && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
           <div className="px-4 py-6 sm:px-0">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
               <h2 className="text-3xl font-bold text-gray-800">Gestion des Produits</h2>
@@ -1800,7 +1800,7 @@ const KitchenManagement: React.FC = () => {
         )}
 
         {/* Section Catégories (seulement pour les entreprises autorisées et pas accessible aux employés) */}
-        {activeTab === 'categories' && canViewProductsAndCategories() && userProfile?.role !== 'employee' && (
+        {activeTab === 'categories' && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
           <div className="px-4 py-6 sm:px-0">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
               <h2 className="text-3xl font-bold text-gray-800">Gestion des Catégories</h2>
@@ -1911,7 +1911,7 @@ const KitchenManagement: React.FC = () => {
         )}
 
         {/* Section Rapports (seulement pour les entreprises autorisées et pas accessible aux employés) */}
-        {activeTab === 'reports' && canViewProductsAndCategories() && userProfile?.role !== 'employee' && (
+        {activeTab === 'reports' && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
           <div className="px-4 py-6 sm:px-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <h2 className="text-3xl font-bold text-gray-800">Rapports et Statistiques</h2>
@@ -2181,7 +2181,7 @@ const KitchenManagement: React.FC = () => {
                         ))
                       }
                     </optgroup>
-                    {['responsable', 'employee'].includes(userProfile?.role || '') && (
+                    {['responsable', 'employe'].includes(userProfile?.role || '') && (
                       <optgroup label="Catégories de l'entreprise">
                         {categories
                           .filter(cat => !cat.global && cat.companyId === userProfile?.entreprise)
@@ -2348,7 +2348,7 @@ const KitchenManagement: React.FC = () => {
       )}
 
       {/* Modal pour ajouter un produit (seulement pour les entreprises autorisées et pas accessible aux employés) */}
-      {showProductModal && canViewProductsAndCategories() && userProfile?.role !== 'employee' && (
+      {showProductModal && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-6">
@@ -2456,7 +2456,7 @@ const KitchenManagement: React.FC = () => {
       )}
 
       {/* Modal pour ajouter une catégorie (seulement pour les entreprises autorisées et pas accessible aux employés) */}
-      {showCategoryModal && canViewProductsAndCategories() && userProfile?.role !== 'employee' && (
+      {showCategoryModal && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
             <div className="flex justify-between items-center mb-6">
