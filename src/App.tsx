@@ -42,7 +42,7 @@ import KitchenManagement from './pages/KitchenManagement';
             <Route path="/justification" element={<ProtectedRoute><EmployeeAbsences /></ProtectedRoute>} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/kitchen" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><KitchenManagement user={undefined}  /></ProtectedRoute>} />
+            <Route path="/kitchen" element={<ProtectedRoute requiredRole={['super_admin', 'responsable','employe']}><KitchenManagement user={undefined}  /></ProtectedRoute>} />
 
             
           </Routes>
