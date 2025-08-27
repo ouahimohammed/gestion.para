@@ -57,7 +57,7 @@ export function Sidebar() {
     { name: 'Responsables', href: '/responsables', icon: UserCog, roles: [ 'super_admin'] },
     { name: 'Profil', href: '/profiladmin', icon: User, roles: [ 'super_admin' ] },   
     { name: 'Justification', href: '/justification', icon: FileCheck, roles: [ 'employe'] },
-    { name: 'cuisine', href: '/kitchen', icon: Clock, roles: ['super_admin', 'responsable','employe'] },
+    { name: 'Dépenses Journalier', href: '/kitchen', icon: Clock, roles: ['super_admin', 'responsable','employe'] },
 
   ];
 
