@@ -293,8 +293,10 @@ const KitchenManagement: React.FC = () => {
       
       if (userProfile?.role === 'super_admin') {
         if (selectedCompany) {
+          // Utiliser le nom de l'entreprise au lieu de l'ID
+          const selectedCompanyName = companies.find(c => c.nom === selectedCompany)?.nom || selectedCompany;
           q = query(productsQuery, 
-            where('companyId', '==', selectedCompany),
+            where('companyId', '==', selectedCompanyName),
             orderBy('name')
           );
         } else {
@@ -347,6 +349,7 @@ const KitchenManagement: React.FC = () => {
       
       if (userProfile?.role === 'super_admin') {
         if (selectedCompany) {
+          // CORRECTION: Utiliser directement le nom de l'entreprise
           q = query(purchasesQuery, 
             where('companyId', '==', selectedCompany),
             orderBy('date', 'desc')
@@ -382,18 +385,8 @@ const KitchenManagement: React.FC = () => {
           }
         }
 
-        // Récupérer le nom de l'entreprise
-        try {
-          const companyDoc = await getDoc(doc(db, 'entreprises', purchase.companyId));
-          if (companyDoc.exists()) {
-            purchase.companyName = companyDoc.data().nom;
-          } else {
-            purchase.companyName = purchase.companyId;
-          }
-        } catch (err) {
-          console.warn('Impossible de récupérer le nom de l\'entreprise:', err);
-          purchase.companyName = purchase.companyId;
-        }
+        // Le nom de l'entreprise est déjà dans companyId
+        purchase.companyName = purchase.companyId;
         
         purchasesData.push(purchase);
       }
@@ -443,7 +436,7 @@ const KitchenManagement: React.FC = () => {
 
       // Créer les produits
       const companyId = userProfile?.role === 'super_admin' ? 
-        (selectedCompany || companies[0]?.id || '') : 
+        (selectedCompany || companies[0]?.nom || '') : 
         userProfile?.entreprise || '';
 
       if (!companyId) {
@@ -828,12 +821,10 @@ const KitchenManagement: React.FC = () => {
       doc.setTextColor(102, 102, 102);
       
       let yPosition = 35;
-      if (selectedCompany && companies.length > 0) {
-        const company = companies.find(c => c.id === selectedCompany);
-        doc.text(`Entreprise: ${company?.nom || 'Non spécifiée'}`, 14, yPosition);
+      if (selectedCompany) {
+        doc.text(`Entreprise: ${selectedCompany}`, 14, yPosition);
       } else if (userProfile?.role === 'responsable') {
-        const company = companies.find(c => c.id === userProfile.entreprise);
-        doc.text(`Entreprise: ${company?.nom || userProfile.entreprise || 'Non spécifiée'}`, 14, yPosition);
+        doc.text(`Entreprise: ${userProfile.entreprise || 'Non spécifiée'}`, 14, yPosition);
       } else {
         doc.text('Entreprise: Toutes les entreprises', 14, yPosition);
       }
@@ -992,9 +983,7 @@ const KitchenManagement: React.FC = () => {
         );
       }
 
-      const companyName = selectedCompany ? 
-        companies.find(c => c.id === selectedCompany)?.nom || 'entreprise' : 
-        'global';
+      const companyName = selectedCompany || 'global';
       const fileName = `rapport-achats-${companyName}-${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
       
@@ -1256,7 +1245,7 @@ const KitchenManagement: React.FC = () => {
                     >
                       <option value="">Toutes les sociétés</option>
                       {companies.map(company => (
-                        <option key={company.id} value={company.id}>
+                        <option key={company.id} value={company.nom}>
                           {company.nom}
                         </option>
                       ))}
@@ -1719,7 +1708,7 @@ const KitchenManagement: React.FC = () => {
                                   }}
                                 >
                                   <Building2 className="mr-1 h-3 w-3" />
-                                  {companies.find(c => c.id === product.companyId)?.nom || product.companyId || '—'}
+                                  {companies.find(c => c.nom === product.companyId)?.nom || product.companyId || '—'}
                                 </span>
                               </td>
                             )}
@@ -2302,7 +2291,7 @@ const KitchenManagement: React.FC = () => {
                   >
                     <option value="">Sélectionner une société</option>
                     {companies.map(company => (
-                      <option key={company.id} value={company.id}>{company.nom}</option>
+                      <option key={company.id} value={company.nom}>{company.nom}</option>
                     ))}
                   </select>
                 </div>
@@ -2423,7 +2412,7 @@ const KitchenManagement: React.FC = () => {
                   >
                     <option value="">Sélectionner une société</option>
                     {companies.map(company => (
-                      <option key={company.id} value={company.id}>{company.nom}</option>
+                      <option key={company.id} value={company.nom}>{company.nom}</option>
                     ))}
                   </select>
                 </div>
