@@ -20,6 +20,7 @@ import { MarkAbsence } from './pages/MarkAbsence';
 import { EmployeeAbsences } from './pages/EmployeeAbsences';
 import KitchenManagement from './pages/KitchenManagement';
 import SuiviVoiture from './pages/SuiviVoiture';
+import LesCharges from './pages/LesCharges';
  function App() {
   return (
     <ToastProvider>
@@ -40,6 +41,7 @@ import SuiviVoiture from './pages/SuiviVoiture';
             <Route path="/responsables" element={<ProtectedRoute><Responsables /></ProtectedRoute>} />
             <Route path="/absences" element={<ProtectedRoute><MarkAbsence /></ProtectedRoute>} />
             <Route path="/cars" element={<ProtectedRoute><SuiviVoiture  /></ProtectedRoute>} />
+            <Route path="/charges" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><LesCharges /></ProtectedRoute>} />
 
             <Route path="/justification" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><EmployeeAbsences /></ProtectedRoute>} />
             <Route path="/unauthorized" element={<Unauthorized />} />
