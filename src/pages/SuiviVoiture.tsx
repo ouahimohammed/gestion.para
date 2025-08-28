@@ -25,53 +25,23 @@ import {
   TrendingUp
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { 
+  collection, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const SuiviVoiture = () => {
-  // États pour les données - utilisation d'un mock local pour la démo
-  const [cars, setCars] = useState([
-    {
-      id: '1',
-      brand: 'BMW',
-      model: 'X3',
-      year: '2020',
-      registration: 'MA-123-AB',
-      currentMileage: 85000,
-      insurances: [
-        {
-          id: '1',
-          startDate: '2024-01-01',
-          endDate: '2024-12-31',
-          paymentStatus: 'Payé',
-          company: 'AXA',
-          amount: '1200'
-        }
-      ],
-      oilChanges: [
-        {
-          id: '1',
-          lastChangeDate: '2024-06-01',
-          mileage: 75000,
-          status: 'Fait',
-          nextDueDate: '2024-12-01',
-          nextDueMileage: 85000,
-          notes: 'Huile moteur changée'
-        }
-      ],
-      technicalInspections: [
-        {
-          id: '1',
-          inspectionDate: '2024-03-15',
-          expiryDate: '2025-03-15',
-          status: 'Valide',
-          center: 'Centre Norisko',
-          cost: '300',
-          notes: 'Visite sans problème'
-        }
-      ]
-    }
-  ]);
-  
-  const [loading, setLoading] = useState(false);
+  // États pour les données
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // États pour l'interface
   const [searchTerm, setSearchTerm] = useState('');
@@ -123,8 +93,36 @@ const SuiviVoiture = () => {
   // Notifications
   const [notifications, setNotifications] = useState([]);
 
+  // Charger les données depuis Firebase
+  useEffect(() => {
+    setLoading(true);
+    const q = query(collection(db, 'cars'), orderBy('createdAt', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const carsData = [];
+      querySnapshot.forEach((doc) => {
+        carsData.push({ 
+          id: doc.id, 
+          ...doc.data(),
+          // Assurer que les tableaux existent
+          insurances: doc.data().insurances || [],
+          oilChanges: doc.data().oilChanges || [],
+          technicalInspections: doc.data().technicalInspections || []
+        });
+      });
+      setCars(carsData);
+      setLoading(false);
+    }, (error) => {
+      console.error('Erreur lors du chargement des données:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   // Fonctions utilitaires pour les dates
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -134,6 +132,7 @@ const SuiviVoiture = () => {
   };
 
   const getDaysUntilDate = (dateString) => {
+    if (!dateString) return Infinity;
     const today = new Date();
     const targetDate = new Date(dateString);
     const diffTime = targetDate - today;
@@ -142,8 +141,8 @@ const SuiviVoiture = () => {
 
   // Logique de vidange - calcul automatique basé sur 10 000 km
   const calculateNextOilChange = (currentMileage, lastChangeMileage) => {
-    const nextMileage = lastChangeMileage + 10000;
-    const remainingKm = nextMileage - currentMileage;
+    const nextMileage = parseInt(lastChangeMileage) + 10000;
+    const remainingKm = nextMileage - parseInt(currentMileage || 0);
     return { nextMileage, remainingKm };
   };
 
@@ -158,7 +157,7 @@ const SuiviVoiture = () => {
 
   const checkOilChangeDue = (currentMileage, lastChangeMileage) => {
     const { remainingKm } = calculateNextOilChange(currentMileage, lastChangeMileage);
-    return remainingKm <= 1000; // Alerte à 1000km près
+    return remainingKm <= 1000;
   };
 
   const checkTechnicalInspectionExpiry = (expiryDate) => {
@@ -176,25 +175,23 @@ const SuiviVoiture = () => {
     
     cars.forEach(car => {
       // Vérifier les assurances
-      if (car.insurances && car.insurances.length > 0) {
-        car.insurances.forEach(insurance => {
-          const daysUntilExpiry = getDaysUntilDate(insurance.endDate);
-          
-          if (daysUntilExpiry <= 15 && daysUntilExpiry >= 0) {
-            newNotifications.push({
-              type: 'insurance',
-              message: `L'assurance de ${car.brand} ${car.model} expire dans ${daysUntilExpiry} jours`,
-              carId: car.id,
-              itemId: insurance.id,
-              date: insurance.endDate,
-              priority: daysUntilExpiry <= 7 ? 'high' : 'medium'
-            });
-          }
-        });
-      }
+      car.insurances.forEach(insurance => {
+        const daysUntilExpiry = getDaysUntilDate(insurance.endDate);
+        
+        if (daysUntilExpiry <= 15 && daysUntilExpiry >= 0) {
+          newNotifications.push({
+            type: 'insurance',
+            message: `L'assurance de ${car.brand} ${car.model} expire dans ${daysUntilExpiry} jours`,
+            carId: car.id,
+            itemId: insurance.id,
+            date: insurance.endDate,
+            priority: daysUntilExpiry <= 7 ? 'high' : 'medium'
+          });
+        }
+      });
       
       // Vérifier les vidanges
-      if (car.oilChanges && car.oilChanges.length > 0 && car.currentMileage) {
+      if (car.currentMileage) {
         car.oilChanges.forEach(oilChange => {
           const { remainingKm } = calculateNextOilChange(car.currentMileage, oilChange.mileage);
           
@@ -212,22 +209,20 @@ const SuiviVoiture = () => {
       }
       
       // Vérifier les visites techniques
-      if (car.technicalInspections && car.technicalInspections.length > 0) {
-        car.technicalInspections.forEach(inspection => {
-          const daysUntilExpiry = getDaysUntilDate(inspection.expiryDate);
-          
-          if (daysUntilExpiry <= 30 && daysUntilExpiry >= 0) {
-            newNotifications.push({
-              type: 'technical',
-              message: `Visite technique de ${car.brand} ${car.model} dans ${daysUntilExpiry} jours`,
-              carId: car.id,
-              itemId: inspection.id,
-              date: inspection.expiryDate,
-              priority: daysUntilExpiry <= 15 ? 'high' : 'medium'
-            });
-          }
-        });
-      }
+      car.technicalInspections.forEach(inspection => {
+        const daysUntilExpiry = getDaysUntilDate(inspection.expiryDate);
+        
+        if (daysUntilExpiry <= 30 && daysUntilExpiry >= 0) {
+          newNotifications.push({
+            type: 'technical',
+            message: `Visite technique de ${car.brand} ${car.model} dans ${daysUntilExpiry} jours`,
+            carId: car.id,
+            itemId: inspection.id,
+            date: inspection.expiryDate,
+            priority: daysUntilExpiry <= 15 ? 'high' : 'medium'
+          });
+        }
+      });
     });
     
     setNotifications(newNotifications);
@@ -237,26 +232,33 @@ const SuiviVoiture = () => {
     checkAllDueDates();
   }, [cars]);
 
-  // CRUD Operations
+  // CRUD Operations avec Firebase
   const addCar = async () => {
     if (!carForm.brand || !carForm.model || !carForm.year || !carForm.registration) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    const newCar = {
-      id: Date.now().toString(),
-      ...carForm,
-      currentMileage: parseInt(carForm.currentMileage) || 0,
-      insurances: [],
-      oilChanges: [],
-      technicalInspections: [],
-      createdAt: new Date()
-    };
+    try {
+      const newCar = {
+        brand: carForm.brand,
+        model: carForm.model,
+        year: carForm.year,
+        registration: carForm.registration,
+        currentMileage: parseInt(carForm.currentMileage) || 0,
+        insurances: [],
+        oilChanges: [],
+        technicalInspections: [],
+        createdAt: serverTimestamp()
+      };
 
-    setCars(prev => [...prev, newCar]);
-    setShowAddCarModal(false);
-    resetCarForm();
+      await addDoc(collection(db, 'cars'), newCar);
+      setShowAddCarModal(false);
+      resetCarForm();
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la voiture:', error);
+      alert('Erreur lors de l\'ajout de la voiture');
+    }
   };
 
   const addInsurance = async () => {
@@ -265,24 +267,27 @@ const SuiviVoiture = () => {
       return;
     }
 
-    const newInsurance = {
-      id: Date.now().toString(),
-      ...insuranceForm,
-      createdAt: new Date()
-    };
+    try {
+      const newInsurance = {
+        id: Date.now().toString(),
+        ...insuranceForm,
+        amount: insuranceForm.amount || '',
+        createdAt: new Date().toISOString()
+      };
 
-    setCars(prev => prev.map(car => {
-      if (car.id === selectedCarId) {
-        return {
-          ...car,
-          insurances: [...(car.insurances || []), newInsurance]
-        };
-      }
-      return car;
-    }));
+      const carRef = doc(db, 'cars', selectedCarId);
+      const car = cars.find(c => c.id === selectedCarId);
+      
+      await updateDoc(carRef, {
+        insurances: [...car.insurances, newInsurance]
+      });
 
-    setShowAddItemModal(false);
-    resetInsuranceForm();
+      setShowAddItemModal(false);
+      resetInsuranceForm();
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de l\'assurance:', error);
+      alert('Erreur lors de l\'ajout de l\'assurance');
+    }
   };
 
   const addOilChange = async () => {
@@ -291,29 +296,33 @@ const SuiviVoiture = () => {
       return;
     }
 
-    const mileage = parseInt(oilChangeForm.mileage);
-    const { nextMileage } = calculateNextOilChange(mileage, mileage);
-    
-    const newOilChange = {
-      id: Date.now().toString(),
-      ...oilChangeForm,
-      mileage,
-      nextDueMileage: nextMileage,
-      createdAt: new Date()
-    };
+    try {
+      const mileage = parseInt(oilChangeForm.mileage);
+      const { nextMileage } = calculateNextOilChange(mileage, mileage);
+      
+      const newOilChange = {
+        id: Date.now().toString(),
+        lastChangeDate: oilChangeForm.lastChangeDate,
+        mileage: mileage,
+        status: oilChangeForm.status,
+        notes: oilChangeForm.notes || '',
+        nextDueMileage: nextMileage,
+        createdAt: new Date().toISOString()
+      };
 
-    setCars(prev => prev.map(car => {
-      if (car.id === selectedCarId) {
-        return {
-          ...car,
-          oilChanges: [...(car.oilChanges || []), newOilChange]
-        };
-      }
-      return car;
-    }));
+      const carRef = doc(db, 'cars', selectedCarId);
+      const car = cars.find(c => c.id === selectedCarId);
+      
+      await updateDoc(carRef, {
+        oilChanges: [...car.oilChanges, newOilChange]
+      });
 
-    setShowAddItemModal(false);
-    resetOilChangeForm();
+      setShowAddItemModal(false);
+      resetOilChangeForm();
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la vidange:', error);
+      alert('Erreur lors de l\'ajout de la vidange');
+    }
   };
 
   const addTechnicalInspection = async () => {
@@ -322,39 +331,54 @@ const SuiviVoiture = () => {
       return;
     }
 
-    const newInspection = {
-      id: Date.now().toString(),
-      ...technicalInspectionForm,
-      createdAt: new Date()
-    };
+    try {
+      const newInspection = {
+        id: Date.now().toString(),
+        inspectionDate: technicalInspectionForm.inspectionDate,
+        expiryDate: technicalInspectionForm.expiryDate,
+        status: technicalInspectionForm.status,
+        center: technicalInspectionForm.center || '',
+        cost: technicalInspectionForm.cost || '',
+        notes: technicalInspectionForm.notes || '',
+        createdAt: new Date().toISOString()
+      };
 
-    setCars(prev => prev.map(car => {
-      if (car.id === selectedCarId) {
-        return {
-          ...car,
-          technicalInspections: [...(car.technicalInspections || []), newInspection]
-        };
-      }
-      return car;
-    }));
+      const carRef = doc(db, 'cars', selectedCarId);
+      const car = cars.find(c => c.id === selectedCarId);
+      
+      await updateDoc(carRef, {
+        technicalInspections: [...car.technicalInspections, newInspection]
+      });
 
-    setShowAddItemModal(false);
-    resetTechnicalInspectionForm();
+      setShowAddItemModal(false);
+      resetTechnicalInspectionForm();
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la visite technique:', error);
+      alert('Erreur lors de l\'ajout de la visite technique');
+    }
   };
 
   const deleteCar = async (carId) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette voiture ?')) {
-      setCars(prev => prev.filter(car => car.id !== carId));
+      try {
+        await deleteDoc(doc(db, 'cars', carId));
+      } catch (error) {
+        console.error('Erreur lors de la suppression de la voiture:', error);
+        alert('Erreur lors de la suppression de la voiture');
+      }
     }
   };
 
-  const updateCarMileage = (carId, newMileage) => {
-    setCars(prev => prev.map(car => {
-      if (car.id === carId) {
-        return { ...car, currentMileage: parseInt(newMileage) };
-      }
-      return car;
-    }));
+  const updateCarMileage = async (carId, newMileage) => {
+    try {
+      const carRef = doc(db, 'cars', carId);
+      await updateDoc(carRef, {
+        currentMileage: parseInt(newMileage) || 0
+      });
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du kilométrage:', error);
+      alert('Erreur lors de la mise à jour du kilométrage');
+    }
   };
 
   // Reset forms
@@ -497,7 +521,7 @@ const SuiviVoiture = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600">Chargement des données...</p>
         </div>
       </div>
     );
