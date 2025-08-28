@@ -18,7 +18,8 @@ import {
   TrendingUp,
   Clock,
   UserCog,
-  FileCheck
+  FileCheck,
+  CalendarCheck
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -48,16 +49,15 @@ export function Sidebar() {
     { name: 'Employés', href: '/employees', icon: Users, roles: ['super_admin', 'responsable'] },
     { name: 'Congés', href: '/leaves', icon: Calendar, roles: ['super_admin', 'responsable'] },
     { name: 'Demande de congé', href: '/request-leave', icon: ClipboardList, roles: ['employe','responsable'] },
-    // { name: 'Planning', href: '/calendar', icon: Calendar, roles: ['super_admin', 'responsable'] },  
-    { name: 'Profil', href: '/profile', icon: User, roles: [ 'responsable','employe'] },   
     { name: 'Rapports', href: '/reports', icon: BarChart3, roles: ['super_admin', 'responsable'] },
     { name: 'Absences', href: '/absences', icon: Clock, roles: ['super_admin', 'responsable'] },
     { name: 'Entreprises', href: '/companies', icon: Building2, roles: ['super_admin'] },
-    // { name: 'Notifications', href: '/notifications', icon: Bell, roles: ['super_admin', 'responsable', 'employe'] },
     { name: 'Responsables', href: '/responsables', icon: UserCog, roles: [ 'super_admin'] },
-    { name: 'Profil', href: '/profiladmin', icon: User, roles: [ 'super_admin' ] },   
     { name: 'Justification', href: '/justification', icon: FileCheck, roles: [ 'employe'] },
-    { name: 'Dépenses Journalier', href: '/kitchen', icon: Clock, roles: ['super_admin', 'responsable','employe'] },
+    { name: 'cuisine', href: '/kitchen', icon: CalendarCheck, roles: ['super_admin', 'responsable','employe'] },
+    { name: 'Profil', href: '/profiladmin', icon: User, roles: [ 'super_admin' ] },   
+    { name: 'Suivi Voiture', href: '/cars', icon: User, roles: [ 'super_admin', 'responsable' ] },   
+    { name: 'Profil', href: '/profile', icon: User, roles: [ 'responsable','employe'] },   
 
   ];
 
