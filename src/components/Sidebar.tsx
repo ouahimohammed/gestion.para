@@ -19,7 +19,13 @@ import {
   Clock,
   UserCog,
   FileCheck,
-  CalendarCheck
+  CalendarCheck,
+  CalendarDays,
+  Car,
+  Clock4,
+  FileCheck2,
+  Utensils,
+  Wallet
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -43,23 +49,22 @@ export function Sidebar() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isOpen]);
-
-  const navigation = [
-    { name: 'Tableau de bord', href: '/dashboard', icon: Home, roles: ['super_admin', 'responsable', 'employe'] },
-    { name: 'Employés', href: '/employees', icon: Users, roles: ['super_admin', 'responsable'] },
-    { name: 'Congés', href: '/leaves', icon: Calendar, roles: ['super_admin', 'responsable'] },
-    { name: 'Demande de congé', href: '/request-leave', icon: ClipboardList, roles: ['employe','responsable'] },
-    { name: 'Rapports', href: '/reports', icon: BarChart3, roles: ['super_admin', 'responsable'] },
-    { name: 'Absences', href: '/absences', icon: Clock, roles: ['super_admin', 'responsable'] },
-    { name: 'Entreprises', href: '/companies', icon: Building2, roles: ['super_admin'] },
-    { name: 'Responsables', href: '/responsables', icon: UserCog, roles: [ 'super_admin'] },
-    { name: 'Justification', href: '/justification', icon: FileCheck, roles: [ 'employe'] },
-    { name: 'cuisine', href: '/kitchen', icon: CalendarCheck, roles: ['super_admin', 'responsable','employe'] },
-    { name: 'Profil', href: '/profiladmin', icon: User, roles: [ 'super_admin' ] },   
-    { name: 'Suivi Voiture', href: '/cars', icon: User, roles: [ 'super_admin', 'responsable' ] },   
-    { name: 'Profil', href: '/profile', icon: User, roles: [ 'responsable','employe'] },   
-
-  ];
+const navigation = [
+  { name: "Tableau de bord", href: "/dashboard", icon: Home, roles: ["super_admin", "responsable", "employe"] },
+  { name: "Employés", href: "/employees", icon: Users, roles: ["super_admin", "responsable"] },
+  { name: "Congés", href: "/leaves", icon: CalendarDays, roles: ["super_admin", "responsable"] },
+  { name: "Demande de congé", href: "/request-leave", icon: ClipboardList, roles: ["employe", "responsable"] },
+  { name: "Rapports", href: "/reports", icon: BarChart3, roles: ["super_admin", "responsable"] },
+  { name: "Absences", href: "/absences", icon: Clock4, roles: ["super_admin", "responsable"] },
+  { name: "Entreprises", href: "/companies", icon: Building2, roles: ["super_admin"] },
+  { name: "Responsables", href: "/responsables", icon: UserCog, roles: ["super_admin"] },
+  { name: "Justification", href: "/justification", icon: FileCheck2, roles: ["employe"] },
+  { name: "Suivi Dépenses", href: "/kitchen", icon: Utensils, roles: ["super_admin", "responsable", "employe"] },
+  { name: "Profil", href: "/profiladmin", icon: User, roles: ["super_admin"] },
+  { name: "Suivi Voiture", href: "/cars", icon: Car, roles: ["super_admin", "responsable"] },
+  { name: "Profil", href: "/profile", icon: User, roles: ["responsable", "employe"] },
+  { name: "Les Charges", href: "/charges", icon: Wallet, roles: ["super_admin", "responsable"] },
+];
 
   const filteredNavigation = navigation.filter(item => 
     item.roles.includes(userProfile?.role || '')
