@@ -42,6 +42,7 @@ import LesCharges from './pages/LesCharges';
             <Route path="/absences" element={<ProtectedRoute><MarkAbsence /></ProtectedRoute>} />
             <Route path="/cars" element={<ProtectedRoute><SuiviVoiture  /></ProtectedRoute>} />
             <Route path="/charges" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><LesCharges /></ProtectedRoute>} />
+            <Route path="/heuresup" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><SuiviHeuresSup user={undefined}  /></ProtectedRoute>} />
 
             <Route path="/justification" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><EmployeeAbsences /></ProtectedRoute>} />
             <Route path="/unauthorized" element={<Unauthorized />} />
