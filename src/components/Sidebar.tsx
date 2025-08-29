@@ -64,6 +64,8 @@ const navigation = [
   { name: "Suivi Voiture", href: "/cars", icon: Car, roles: ["super_admin", "responsable"] },
   { name: "Profil", href: "/profile", icon: User, roles: ["responsable", "employe"] },
   { name: "Les Charges", href: "/charges", icon: Wallet, roles: ["super_admin", "responsable"] },
+  { name: 'Heures Supplémentaires', href: '/heuresup', icon: Clock, roles: ['super_admin', 'responsable'] },
+
 ];
 
   const filteredNavigation = navigation.filter(item => 
