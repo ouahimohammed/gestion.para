@@ -13,6 +13,8 @@ import { Unauthorized } from './pages/Unauthorized';
 import { RequestLeave } from './pages/RequestLeave';
 import { Profile } from './pages/Profile';
 import { Responsables } from './pages/Responsables';
+import SuiviVoiture from './pages/SuiviVoiture';
+import LesCharges from './pages/LesCharges';
 
 import { ToastProvider } from './components/ui/use-toast';
 import { ProfileAdmin } from './pages/ProfileAdmin ';
@@ -41,6 +43,8 @@ import SuiviHeuresSup from './pages/SuiviHeuresSup';
             <Route path="/responsables" element={<ProtectedRoute><Responsables /></ProtectedRoute>} />
             <Route path="/absences" element={<ProtectedRoute><MarkAbsence /></ProtectedRoute>} />
             <Route path="/justification" element={<ProtectedRoute><EmployeeAbsences /></ProtectedRoute>} />
+             <Route path="/cars" element={<ProtectedRoute><SuiviVoiture  /></ProtectedRoute>} />
+            <Route path="/charges" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><LesCharges /></ProtectedRoute>} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/heuresup" element={<ProtectedRoute requiredRole={['super_admin', 'responsable']}><SuiviHeuresSup user={undefined}  /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
