@@ -22,7 +22,12 @@ import {
   Filter,
   SortAsc,
   Eye,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
+  BarChart3,
+  Users,
+  Building,
+  FileText
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { 
@@ -518,115 +523,158 @@ const SuiviVoiture = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des données...</p>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-6"></div>
+            <div className="absolute inset-0 rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 animate-spin mx-auto" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+          </div>
+          <p className="text-gray-700 text-lg font-medium">Chargement des données...</p>
+          <p className="text-gray-500 text-sm mt-2">Synchronisation avec Firebase</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header moderne */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/60 sticky top-0 z-40">
-        <div className="flex items-center justify-between max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-              <Car className="h-7 w-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Suivi des Voitures</h1>
-              <p className="text-sm text-gray-600">Gérez vos véhicules, assurances et entretiens</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header avec design premium light */}
+        <div className="relative bg-white/90 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-6 md:p-8 mb-8 shadow-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -skew-x-12 animate-pulse"></div>
           
-          <div className="flex items-center gap-4">
-            <NotificationBell notifications={notifications} />
-            
-            <button
-              onClick={() => setShowAddCarModal(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <Plus size={20} />
-              Nouvelle voiture
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Barre de recherche et filtres améliorée */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par marque, modèle ou immatriculation..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-              />
-            </div>
-            
-            <div className="flex gap-3">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-              >
-                <option value="all">Tous les véhicules</option>
-                <option value="alerts">Avec alertes</option>
-              </select>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+                  <Car className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent mb-2">
+                    Suivi des Voitures
+                  </h1>
+                  <p className="text-gray-600 text-lg">
+                    Gérez vos véhicules, assurances et entretiens
+                  </p>
+                </div>
+              </div>
               
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-              >
-                <option value="name">Trier par nom</option>
-                <option value="year">Trier par année</option>
-                <option value="mileage">Trier par kilométrage</option>
-              </select>
+              <div className="flex items-center gap-3">
+                <NotificationBell notifications={notifications} />
+                
+                <button
+                  onClick={() => setShowAddCarModal(true)}
+                  className="group flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-3 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
+                  Nouvelle voiture
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Statistiques rapides */}
+        {/* Barre de recherche et filtres améliorée */}
+        <div className="relative bg-white/90 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-6 mb-8 shadow-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          
+          <div className="relative z-10">
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <Search className="h-4 w-4 mr-2 text-gray-500" />
+                  Rechercher
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Marque, modèle ou immatriculation..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                    <Filter className="h-4 w-4 mr-2 text-gray-500" />
+                    Filtre
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none appearance-none"
+                  >
+                    <option value="all">Tous les véhicules</option>
+                    <option value="alerts">Avec alertes</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                    <SortAsc className="h-4 w-4 mr-2 text-gray-500" />
+                    Trier par
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none appearance-none"
+                  >
+                    <option value="name">Nom</option>
+                    <option value="year">Année</option>
+                    <option value="mileage">Kilométrage</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Statistiques rapides avec design premium */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Car className="h-5 w-5 text-blue-600" />
+          <div className="group relative bg-white/90 backdrop-blur-xl border border-blue-200/50 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Car className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total véhicules</p>
+                <p className="text-gray-600 text-sm font-medium mb-1">Total véhicules</p>
                 <p className="text-2xl font-bold text-gray-900">{cars.length}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-blue-500 text-xs font-medium">Enregistrés</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+          <div className="group relative bg-white/90 backdrop-blur-xl border border-red-200/50 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <AlertTriangle className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Alertes actives</p>
+                <p className="text-gray-600 text-sm font-medium mb-1">Alertes actives</p>
                 <p className="text-2xl font-bold text-gray-900">{notifications.length}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-red-500 text-xs font-medium">À traiter</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+          <div className="group relative bg-white/90 backdrop-blur-xl border border-emerald-200/50 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">À jour</p>
+                <p className="text-gray-600 text-sm font-medium mb-1">À jour</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {cars.filter(car => {
                     const hasValidInsurance = car.insurances?.some(ins => 
@@ -638,35 +686,42 @@ const SuiviVoiture = () => {
                     return hasValidInsurance && hasValidOil;
                   }).length}
                 </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-emerald-500 text-xs font-medium">En règle</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-orange-600" />
+          <div className="group relative bg-white/90 backdrop-blur-xl border border-purple-200/50 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Kilométrage total</p>
+                <p className="text-gray-600 text-sm font-medium mb-1">Kilométrage total</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {cars.reduce((total, car) => total + (car.currentMileage || 0), 0).toLocaleString()}
                 </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-purple-500 text-xs font-medium">Cumulé</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Liste des voitures avec design amélioré */}
+        {/* Liste des voitures avec design premium */}
         <div className="space-y-6">
           {filteredCars.map((car) => (
-            <div key={car.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+            <div key={car.id} className="bg-white/90 backdrop-blur-xl border border-gray-200/50 rounded-3xl shadow-2xl hover:shadow-2xl transition-all duration-500 overflow-hidden">
               {/* En-tête de la voiture */}
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-6">
-                    <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl">
-                      <Car className="h-8 w-8 text-gray-600" />
+                    <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Car className="h-8 w-8 text-blue-600" />
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-gray-900 mb-1">
@@ -740,16 +795,16 @@ const SuiviVoiture = () => {
                 </div>
               </div>
 
-              {/* Détails expandables avec design amélioré */}
+              {/* Détails expandables avec design premium */}
               {expandedCar === car.id && (
-                <div className="border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-blue-50/30">
+                <div className="border-t border-gray-100 bg-gradient-to-r from-blue-50/50 to-purple-50/30">
                   <div className="p-6">
                     <div className="flex gap-2 mb-6 overflow-x-auto">
                       <button
                         onClick={() => setActiveSection('insurance')}
                         className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
                           activeSection === 'insurance'
-                            ? 'bg-blue-100 text-blue-700 shadow-sm'
+                            ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-sm'
                             : 'text-gray-600 hover:bg-white hover:shadow-sm'
                         }`}
                       >
@@ -760,7 +815,7 @@ const SuiviVoiture = () => {
                         onClick={() => setActiveSection('oilChange')}
                         className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
                           activeSection === 'oilChange'
-                            ? 'bg-blue-100 text-blue-700 shadow-sm'
+                            ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-sm'
                             : 'text-gray-600 hover:bg-white hover:shadow-sm'
                         }`}
                       >
@@ -771,7 +826,7 @@ const SuiviVoiture = () => {
                         onClick={() => setActiveSection('technicalInspection')}
                         className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
                           activeSection === 'technicalInspection'
-                            ? 'bg-blue-100 text-blue-700 shadow-sm'
+                            ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-sm'
                             : 'text-gray-600 hover:bg-white hover:shadow-sm'
                         }`}
                       >
@@ -791,9 +846,9 @@ const SuiviVoiture = () => {
                               setModalType('insurance');
                               setShowAddItemModal(true);
                             }}
-                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
+                            className="group flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2.5 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg"
                           >
-                            <Plus size={16} />
+                            <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
                             Ajouter une assurance
                           </button>
                         </div>
@@ -801,7 +856,7 @@ const SuiviVoiture = () => {
                         {car.insurances && car.insurances.length > 0 ? (
                           <div className="grid gap-4">
                             {car.insurances.map((insurance) => (
-                              <div key={insurance.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                              <div key={insurance.id} className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200">
                                 <div className="flex justify-between items-start">
                                   <div className="space-y-3">
                                     <div className="flex items-center gap-3">
@@ -862,9 +917,9 @@ const SuiviVoiture = () => {
                               });
                               setShowAddItemModal(true);
                             }}
-                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
+                            className="group flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2.5 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg"
                           >
-                            <Plus size={16} />
+                            <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
                             Ajouter une vidange
                           </button>
                         </div>
@@ -875,7 +930,7 @@ const SuiviVoiture = () => {
                               const { nextMileage, remainingKm } = calculateNextOilChange(car.currentMileage || 0, oilChange.mileage);
                               
                               return (
-                                <div key={oilChange.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div key={oilChange.id} className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200">
                                   <div className="flex justify-between items-start">
                                     <div className="space-y-3">
                                       <div className="flex items-center gap-3">
@@ -943,9 +998,9 @@ const SuiviVoiture = () => {
                               setModalType('technicalInspection');
                               setShowAddItemModal(true);
                             }}
-                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
+                            className="group flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2.5 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg"
                           >
-                            <Plus size={16} />
+                            <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
                             Ajouter une visite
                           </button>
                         </div>
@@ -953,7 +1008,7 @@ const SuiviVoiture = () => {
                         {car.technicalInspections && car.technicalInspections.length > 0 ? (
                           <div className="grid gap-4">
                             {car.technicalInspections.map((inspection) => (
-                              <div key={inspection.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                              <div key={inspection.id} className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200">
                                 <div className="flex justify-between items-start">
                                   <div className="space-y-3">
                                     <div className="flex items-center gap-3">
@@ -1011,7 +1066,7 @@ const SuiviVoiture = () => {
 
         {filteredCars.length === 0 && !loading && (
           <div className="text-center py-16">
-            <div className="bg-white rounded-2xl p-12 border border-gray-200 shadow-sm">
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-12 border border-gray-200/50 shadow-2xl">
               <Car className="mx-auto h-20 w-20 text-gray-300 mb-6" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune voiture trouvée</h3>
               <p className="text-gray-600 mb-8">
@@ -1019,8 +1074,9 @@ const SuiviVoiture = () => {
               </p>
               <button
                 onClick={() => setShowAddCarModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="group flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-3 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto"
               >
+                <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
                 Ajouter une voiture
               </button>
             </div>
@@ -1028,83 +1084,103 @@ const SuiviVoiture = () => {
         )}
       </div>
 
-      {/* Modal Ajouter Voiture */}
+      {/* Modal Ajouter Voiture avec design premium */}
       {showAddCarModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Ajouter une voiture</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-200/50">
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                  <Plus className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Ajouter une voiture</h2>
+              </div>
               <button
                 onClick={() => setShowAddCarModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
+                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-2xl transition-all duration-200"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Marque *</label>
-                <input
-                  type="text"
-                  value={carForm.brand}
-                  onChange={(e) => setCarForm({ ...carForm, brand: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="BMW, Mercedes, Toyota..."
-                />
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Marque *</label>
+                <div className="relative">
+                  <Car className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={carForm.brand}
+                    onChange={(e) => setCarForm({ ...carForm, brand: e.target.value })}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    placeholder="BMW, Mercedes, Toyota..."
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Modèle *</label>
-                <input
-                  type="text"
-                  value={carForm.model}
-                  onChange={(e) => setCarForm({ ...carForm, model: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="X3, C-Class, Corolla..."
-                />
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Modèle *</label>
+                <div className="relative">
+                  <Settings className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={carForm.model}
+                    onChange={(e) => setCarForm({ ...carForm, model: e.target.value })}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    placeholder="X3, C-Class, Corolla..."
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Année *</label>
-                <input
-                  type="number"
-                  value={carForm.year}
-                  onChange={(e) => setCarForm({ ...carForm, year: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="2020"
-                />
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Année *</label>
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="number"
+                    value={carForm.year}
+                    onChange={(e) => setCarForm({ ...carForm, year: e.target.value })}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    placeholder="2020"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Immatriculation *</label>
-                <input
-                  type="text"
-                  value={carForm.registration}
-                  onChange={(e) => setCarForm({ ...carForm, registration: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="MA-123-AB"
-                />
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Immatriculation *</label>
+                <div className="relative">
+                  <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={carForm.registration}
+                    onChange={(e) => setCarForm({ ...carForm, registration: e.target.value })}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    placeholder="MA-123-AB"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Kilométrage actuel</label>
-                <input
-                  type="number"
-                  value={carForm.currentMileage}
-                  onChange={(e) => setCarForm({ ...carForm, currentMileage: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="75000"
-                />
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Kilométrage actuel</label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="number"
+                    value={carForm.currentMileage}
+                    onChange={(e) => setCarForm({ ...carForm, currentMileage: e.target.value })}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    placeholder="75000"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-3 mt-8">
+            <div className="flex gap-4 mt-8">
               <button
                 onClick={() => setShowAddCarModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                className="flex-1 px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold"
               >
                 Annuler
               </button>
               <button
                 onClick={addCar}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-medium shadow-lg"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105"
               >
                 Ajouter
               </button>
@@ -1113,126 +1189,158 @@ const SuiviVoiture = () => {
         </div>
       )}
 
-      {/* Modal Ajouter Assurance/Vidange/Visite Technique */}
+      {/* Modal Ajouter Assurance/Vidange/Visite Technique avec design premium */}
       {showAddItemModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">
-                {modalType === 'insurance' && 'Ajouter une assurance'}
-                {modalType === 'oilChange' && 'Ajouter une vidange'}
-                {modalType === 'technicalInspection' && 'Ajouter une visite technique'}
-              </h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-200/50 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                  <Plus className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {modalType === 'insurance' && 'Ajouter une assurance'}
+                  {modalType === 'oilChange' && 'Ajouter une vidange'}
+                  {modalType === 'technicalInspection' && 'Ajouter une visite technique'}
+                </h2>
+              </div>
               <button
                 onClick={() => setShowAddItemModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
+                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-2xl transition-all duration-200"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
 
             {modalType === 'insurance' && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Compagnie d'assurance *</label>
-                  <input
-                    type="text"
-                    value={insuranceForm.company}
-                    onChange={(e) => setInsuranceForm({ ...insuranceForm, company: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="AXA, Wafa, Atlanta..."
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Compagnie d'assurance *</label>
+                  <div className="relative">
+                    <Building className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={insuranceForm.company}
+                      onChange={(e) => setInsuranceForm({ ...insuranceForm, company: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                      placeholder="AXA, Wafa, Atlanta..."
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date de début *</label>
-                  <input
-                    type="date"
-                    value={insuranceForm.startDate}
-                    onChange={(e) => setInsuranceForm({ ...insuranceForm, startDate: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Date de début *</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="date"
+                      value={insuranceForm.startDate}
+                      onChange={(e) => setInsuranceForm({ ...insuranceForm, startDate: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date de fin *</label>
-                  <input
-                    type="date"
-                    value={insuranceForm.endDate}
-                    onChange={(e) => setInsuranceForm({ ...insuranceForm, endDate: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Date de fin *</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="date"
+                      value={insuranceForm.endDate}
+                      onChange={(e) => setInsuranceForm({ ...insuranceForm, endDate: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Montant (DH)</label>
-                  <input
-                    type="number"
-                    value={insuranceForm.amount}
-                    onChange={(e) => setInsuranceForm({ ...insuranceForm, amount: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="1200"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Montant (DH)</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="number"
+                      value={insuranceForm.amount}
+                      onChange={(e) => setInsuranceForm({ ...insuranceForm, amount: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                      placeholder="1200"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut de paiement</label>
-                  <select
-                    value={insuranceForm.paymentStatus}
-                    onChange={(e) => setInsuranceForm({ ...insuranceForm, paymentStatus: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  >
-                    <option value="Non payé">Non payé</option>
-                    <option value="Payé">Payé</option>
-                  </select>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Statut de paiement</label>
+                  <div className="relative">
+                    <CheckCircle className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <select
+                      value={insuranceForm.paymentStatus}
+                      onChange={(e) => setInsuranceForm({ ...insuranceForm, paymentStatus: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none appearance-none"
+                    >
+                      <option value="Non payé">Non payé</option>
+                      <option value="Payé">Payé</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
 
             {modalType === 'oilChange' && (
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-xl mb-4">
-                  <p className="text-sm text-blue-700">
-                    ℹ️ La vidange est recommandée tous les 10 000 km
-                  </p>
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 rounded-2xl p-4 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-blue-600" />
+                    <p className="text-sm text-blue-700">
+                      La vidange est recommandée tous les 10 000 km
+                    </p>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date de la vidange *</label>
-                  <input
-                    type="date"
-                    value={oilChangeForm.lastChangeDate}
-                    onChange={(e) => setOilChangeForm({ ...oilChangeForm, lastChangeDate: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Date de la vidange *</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="date"
+                      value={oilChangeForm.lastChangeDate}
+                      onChange={(e) => setOilChangeForm({ ...oilChangeForm, lastChangeDate: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Kilométrage lors de la vidange *</label>
-                  <input
-                    type="number"
-                    value={oilChangeForm.mileage}
-                    onChange={(e) => setOilChangeForm({ ...oilChangeForm, mileage: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="75000"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Kilométrage lors de la vidange *</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="number"
+                      value={oilChangeForm.mileage}
+                      onChange={(e) => setOilChangeForm({ ...oilChangeForm, mileage: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                      placeholder="75000"
+                    />
+                  </div>
                   {oilChangeForm.mileage && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-600 mt-2 ml-12">
                       Prochaine vidange à {(parseInt(oilChangeForm.mileage) + 10000).toLocaleString()} km
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                  <select
-                    value={oilChangeForm.status}
-                    onChange={(e) => setOilChangeForm({ ...oilChangeForm, status: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  >
-                    <option value="Fait">Fait</option>
-                    <option value="Pas fait">Pas fait</option>
-                  </select>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Statut</label>
+                  <div className="relative">
+                    <CheckCircle className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <select
+                      value={oilChangeForm.status}
+                      onChange={(e) => setOilChangeForm({ ...oilChangeForm, status: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none appearance-none"
+                    >
+                      <option value="Fait">Fait</option>
+                      <option value="Pas fait">Pas fait</option>
+                    </select>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes (optionnel)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Notes (optionnel)</label>
                   <textarea
                     value={oilChangeForm.notes}
                     onChange={(e) => setOilChangeForm({ ...oilChangeForm, notes: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
                     rows={3}
                     placeholder="Type d'huile, observations..."
                   />
@@ -1241,62 +1349,77 @@ const SuiviVoiture = () => {
             )}
 
             {modalType === 'technicalInspection' && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Centre de contrôle *</label>
-                  <input
-                    type="text"
-                    value={technicalInspectionForm.center}
-                    onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, center: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Centre Norisko, DEKRA..."
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Centre de contrôle *</label>
+                  <div className="relative">
+                    <Building className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={technicalInspectionForm.center}
+                      onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, center: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                      placeholder="Centre Norisko, DEKRA..."
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date de la visite *</label>
-                  <input
-                    type="date"
-                    value={technicalInspectionForm.inspectionDate}
-                    onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, inspectionDate: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Date de la visite *</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="date"
+                      value={technicalInspectionForm.inspectionDate}
+                      onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, inspectionDate: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date d'expiration *</label>
-                  <input
-                    type="date"
-                    value={technicalInspectionForm.expiryDate}
-                    onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, expiryDate: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Date d'expiration *</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="date"
+                      value={technicalInspectionForm.expiryDate}
+                      onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, expiryDate: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Coût (DH)</label>
-                  <input
-                    type="number"
-                    value={technicalInspectionForm.cost}
-                    onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, cost: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="300"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Coût (DH)</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="number"
+                      value={technicalInspectionForm.cost}
+                      onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, cost: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
+                      placeholder="300"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                  <select
-                    value={technicalInspectionForm.status}
-                    onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, status: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  >
-                    <option value="Valide">Valide</option>
-                    <option value="Non valide">Non valide</option>
-                  </select>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Statut</label>
+                  <div className="relative">
+                    <CheckCircle className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <select
+                      value={technicalInspectionForm.status}
+                      onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, status: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none appearance-none"
+                    >
+                      <option value="Valide">Valide</option>
+                      <option value="Non valide">Non valide</option>
+                    </select>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes (optionnel)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Notes (optionnel)</label>
                   <textarea
                     value={technicalInspectionForm.notes}
                     onChange={(e) => setTechnicalInspectionForm({ ...technicalInspectionForm, notes: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white outline-none"
                     rows={3}
                     placeholder="Observations, défauts détectés..."
                   />
@@ -1304,10 +1427,10 @@ const SuiviVoiture = () => {
               </div>
             )}
 
-            <div className="flex gap-3 mt-8">
+            <div className="flex gap-4 mt-8">
               <button
                 onClick={() => setShowAddItemModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                className="flex-1 px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold"
               >
                 Annuler
               </button>
@@ -1319,7 +1442,7 @@ const SuiviVoiture = () => {
                       ? addOilChange 
                       : addTechnicalInspection
                 }
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-medium shadow-lg"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105"
               >
                 Ajouter
               </button>
