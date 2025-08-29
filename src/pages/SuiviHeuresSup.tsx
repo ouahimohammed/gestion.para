@@ -39,6 +39,11 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { 
+  generateHeuresSupplementairesPDF,
+  generateRevenusNuitPDF,
+  generateRapportCombinePDF
+} from '../lib/pdfGenerator';
 
 const SuiviHeuresSup = () => {
   const { userProfile } = useAuth();
@@ -61,6 +66,7 @@ const SuiviHeuresSup = () => {
   const [showEditRevenusModal, setShowEditRevenusModal] = useState(false);
   const [showExportHeuresModal, setShowExportHeuresModal] = useState(false);
   const [showExportRevenusModal, setShowExportRevenusModal] = useState(false);
+  const [showExportCombineModal, setShowExportCombineModal] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   
@@ -226,6 +232,15 @@ const SuiviHeuresSup = () => {
   const totalRevenusNuit = filteredRevenus.reduce((sum, rev) => sum + parseFloat(rev.montant || 0), 0);
   const resultatNet = totalRevenusNuit - totalHeuresSupplementaires;
 
+  // Obtenir la période formatée
+  const getPeriodString = () => {
+    const monthNames = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+    return `${monthNames[selectedMonth - 1]} ${selectedYear}`;
+  };
+
   // CRUD Operations pour Heures Supplémentaires
   const addHeuresSupplementaires = async () => {
     if (!heuresForm.employeeId || !heuresForm.date) {
@@ -364,50 +379,20 @@ const SuiviHeuresSup = () => {
     setShowEditRevenusModal(true);
   };
 
-  // Génération PDF pour heures supplémentaires seulement
-  const generateHeuresPDF = async () => {
+  // Génération PDF pour heures supplémentaires
+  const handleExportHeures = async () => {
     setExportLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const reportContent = `
-RAPPORT HEURES SUPPLÉMENTAIRES
-===============================
-
-Période: ${new Date(selectedYear, selectedMonth - 1, 1).toLocaleString('fr-FR', { month: 'long' })} ${selectedYear}
-Date de génération: ${new Date().toLocaleDateString('fr-FR')}
-Généré par: ${userProfile?.nom} (${userProfile?.role})
-${userProfile?.entreprise ? `Entreprise: ${userProfile.entreprise}` : ''}
-
-DÉTAILS PAR EMPLOYÉ:
-${filteredEmployees.map(employee => {
-  const heuresEmployee = filteredHeures.filter(h => h.employeeId === employee.id);
-  const joursComplets = heuresEmployee.filter(h => h.type === 'journée complète').length;
-  const demiJournees = heuresEmployee.filter(h => h.type === 'demi-journée').length;
-  const montantTotal = (joursComplets * 100) + (demiJournees * 50);
-  
-  return `
-${employee.prenom} ${employee.nom} - ${employee.poste}
-   • Journées complètes: ${joursComplets} (${joursComplets * 100} DH)
-   • Demi-journées: ${demiJournees} (${demiJournees * 50} DH)
-   • Total: ${montantTotal} DH`;
-}).join('\n')}
-
-===============================
-TOTAL GÉNÉRAL: ${totalHeuresSupplementaires.toFixed(2)} DH
-===============================
-      `;
-      
-      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `heures_supplementaires_${selectedMonth}_${selectedYear}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      generateHeuresSupplementairesPDF(
+        filteredEmployees,
+        filteredHeures,
+        getPeriodString(),
+        userProfile,
+        totalHeuresSupplementaires
+      );
       
     } catch (error) {
       console.error('Erreur lors de la génération du PDF:', error);
@@ -418,40 +403,19 @@ TOTAL GÉNÉRAL: ${totalHeuresSupplementaires.toFixed(2)} DH
     }
   };
 
-  // Génération PDF pour revenus de nuit seulement
-  const generateRevenusPDF = async () => {
+  // Génération PDF pour revenus de nuit
+  const handleExportRevenus = async () => {
     setExportLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const reportContent = `
-RAPPORT REVENUS DE NUIT
-=======================
-
-Période: ${new Date(selectedYear, selectedMonth - 1, 1).toLocaleString('fr-FR', { month: 'long' })} ${selectedYear}
-Date de génération: ${new Date().toLocaleDateString('fr-FR')}
-Généré par: ${userProfile?.nom} (${userProfile?.role})
-
-DÉTAILS DES REVENUS DE NUIT:
-${filteredRevenus.map(revenu => 
-  `${formatDate(revenu.date)}: ${parseFloat(revenu.montant).toFixed(2)} DH`
-).join('\n')}
-
-=======================
-TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
-=======================
-      `;
-      
-      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `revenus_nuit_${selectedMonth}_${selectedYear}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      generateRevenusNuitPDF(
+        filteredRevenus,
+        getPeriodString(),
+        userProfile,
+        totalRevenusNuit
+      );
       
     } catch (error) {
       console.error('Erreur lors de la génération du PDF:', error);
@@ -459,6 +423,33 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
     } finally {
       setExportLoading(false);
       setShowExportRevenusModal(false);
+    }
+  };
+
+  // Génération PDF combiné
+  const handleExportCombine = async () => {
+    setExportLoading(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      generateRapportCombinePDF(
+        filteredEmployees,
+        filteredHeures,
+        filteredRevenus,
+        getPeriodString(),
+        userProfile,
+        totalHeuresSupplementaires,
+        totalRevenusNuit,
+        resultatNet
+      );
+      
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      alert('Erreur lors de la génération du PDF');
+    } finally {
+      setExportLoading(false);
+      setShowExportCombineModal(false);
     }
   };
 
@@ -588,22 +579,35 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
                   </div>
                 )}
 
-                {/* Boutons Export séparés */}
-                <button
-                  onClick={() => setShowExportHeuresModal(true)}
-                  className="group relative flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  <Download size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-                  Export Heures
-                </button>
+                {/* Boutons Export avec nouveau design */}
+                <div className="flex items-center gap-2 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl px-2 py-2">
+                  <button
+                    onClick={() => setShowExportHeuresModal(true)}
+                    className="group relative flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+                    title="Export Heures Supplémentaires"
+                  >
+                    <Sun size={16} className="group-hover:rotate-12 transition-transform duration-300" />
+                    Heures
+                  </button>
 
-                <button
-                  onClick={() => setShowExportRevenusModal(true)}
-                  className="group relative flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-2xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  <Moon size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-                  Export Revenus Nuit
-                </button>
+                  <button
+                    onClick={() => setShowExportRevenusModal(true)}
+                    className="group relative flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+                    title="Export Revenus Nuit"
+                  >
+                    <Moon size={16} className="group-hover:rotate-12 transition-transform duration-300" />
+                    Revenus
+                  </button>
+
+                  <button
+                    onClick={() => setShowExportCombineModal(true)}
+                    className="group relative flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+                    title="Rapport Complet"
+                  >
+                    <BarChart3 size={16} className="group-hover:rotate-12 transition-transform duration-300" />
+                    Complet
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -909,9 +913,6 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
             </div>
           </div>
         </div>
-
-        {/* Section graphique */}
-        
       </div>
 
       {/* Modal Ajouter Heures */}
@@ -1138,7 +1139,7 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
-                  <Moon className="h-5 w-5 text-white" />
+                  <Plus className="h-5 w-5 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Revenus de Nuit</h2>
               </div>
@@ -1277,7 +1278,7 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
                   <FileText className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Export Heures Supplémentaires</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Export PDF - Heures Supplémentaires</h2>
               </div>
               <button
                 onClick={() => setShowExportHeuresModal(false)}
@@ -1291,12 +1292,16 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Eye className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-bold text-blue-900">Aperçu du rapport - Heures Supplémentaires</h3>
+                  <h3 className="font-bold text-blue-900">Aperçu du rapport PDF - Heures Supplémentaires</h3>
                 </div>
                 <div className="space-y-3 text-sm text-blue-800">
                   <div className="flex justify-between">
+                    <span className="font-medium">Format:</span>
+                    <span className="font-bold text-blue-600">PDF professionnel avec tableaux</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="font-medium">Période:</span>
-                    <span>{new Date(selectedYear, selectedMonth - 1, 1).toLocaleString('fr-FR', { month: 'long' })} {selectedYear}</span>
+                    <span>{getPeriodString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Employés inclus:</span>
@@ -1310,6 +1315,19 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
                   </div>
                 </div>
               </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-blue-600" />
+                  <p className="text-blue-800 font-medium text-sm">Contenu du PDF</p>
+                </div>
+                <ul className="text-blue-700 text-xs space-y-1 ml-6">
+                  <li>• En-tête professionnel avec logo</li>
+                  <li>• Tableau détaillé par employé</li>
+                  <li>• Résumé avec totaux et statistiques</li>
+                  <li>• Footer avec date et pagination</li>
+                </ul>
+              </div>
             </div>
 
             <div className="flex gap-4 mt-8">
@@ -1320,14 +1338,14 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
                 Annuler
               </button>
               <button
-                onClick={generateHeuresPDF}
+                onClick={handleExportHeures}
                 disabled={exportLoading}
                 className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {exportLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                    Génération...
+                    Génération PDF...
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
@@ -1350,7 +1368,7 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
                 <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
                   <Moon className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Export Revenus de Nuit</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Export PDF - Revenus de Nuit</h2>
               </div>
               <button
                 onClick={() => setShowExportRevenusModal(false)}
@@ -1364,12 +1382,16 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Eye className="h-5 w-5 text-purple-600" />
-                  <h3 className="font-bold text-purple-900">Aperçu du rapport - Revenus de Nuit</h3>
+                  <h3 className="font-bold text-purple-900">Aperçu du rapport PDF - Revenus de Nuit</h3>
                 </div>
                 <div className="space-y-3 text-sm text-purple-800">
                   <div className="flex justify-between">
+                    <span className="font-medium">Format:</span>
+                    <span className="font-bold text-purple-600">PDF avec analyses statistiques</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="font-medium">Période:</span>
-                    <span>{new Date(selectedYear, selectedMonth - 1, 1).toLocaleString('fr-FR', { month: 'long' })} {selectedYear}</span>
+                    <span>{getPeriodString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Entrées de revenus:</span>
@@ -1382,6 +1404,19 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-purple-600" />
+                  <p className="text-purple-800 font-medium text-sm">Contenu du PDF</p>
+                </div>
+                <ul className="text-purple-700 text-xs space-y-1 ml-6">
+                  <li>• Liste chronologique des revenus</li>
+                  <li>• Analyses statistiques détaillées</li>
+                  <li>• Moyennes et extremums</li>
+                  <li>• Mise en forme professionnelle</li>
+                </ul>
               </div>
 
               {filteredRevenus.length === 0 && (
@@ -1402,17 +1437,116 @@ TOTAL REVENUS DE NUIT: ${totalRevenusNuit.toFixed(2)} DH
                 Annuler
               </button>
               <button
-                onClick={generateRevenusPDF}
+                onClick={handleExportRevenus}
                 disabled={exportLoading || filteredRevenus.length === 0}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" >  {exportLoading ? (
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {exportLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                    Génération...
+                    Génération PDF...
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <Download size={18} />
                     Générer PDF
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Export Rapport Combiné */}
+      {showExportCombineModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-gray-200/50">
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
+                  <BarChart3 className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Rapport Financier Complet</h2>
+              </div>
+              <button
+                onClick={() => setShowExportCombineModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-2xl transition-all duration-200"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="h-5 w-5 text-emerald-600" />
+                  <h3 className="font-bold text-emerald-900">Vue d'ensemble financière complète</h3>
+                </div>
+                <div className="space-y-3 text-sm text-emerald-800">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Format:</span>
+                    <span className="font-bold text-emerald-600">PDF Multi-sections avec graphiques</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Période:</span>
+                    <span>{getPeriodString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Heures supplémentaires:</span>
+                    <span className="text-red-600 font-bold">-{totalHeuresSupplementaires.toFixed(2)} DH</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Revenus de nuit:</span>
+                    <span className="text-emerald-600 font-bold">+{totalRevenusNuit.toFixed(2)} DH</span>
+                  </div>
+                  <div className="border-t border-emerald-200 pt-3 mt-4">
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Résultat net:</span>
+                      <span className={`${resultatNet >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {resultatNet >= 0 ? '+' : ''}{resultatNet.toFixed(2)} DH
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-emerald-600" />
+                  <p className="text-emerald-800 font-medium text-sm">Sections du rapport complet</p>
+                </div>
+                <ul className="text-emerald-700 text-xs space-y-1 ml-6">
+                  <li>• Vue d'ensemble financière</li>
+                  <li>• Détail des heures supplémentaires</li>
+                  <li>• Analyse des revenus de nuit</li>
+                  <li>• Statistiques et tendances</li>
+                  <li>• Résultat net avec indicateurs</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={() => setShowExportCombineModal(false)}
+                className="flex-1 px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleExportCombine}
+                disabled={exportLoading}
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {exportLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                    Génération PDF...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <BarChart3 size={18} />
+                    Générer Rapport Complet
                   </div>
                 )}
               </button>
