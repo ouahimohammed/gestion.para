@@ -5,7 +5,7 @@ import { Badge } from '../components/ui/Badge';
 import { collection, query, getDocs, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { formatDate } from '../lib/utils';
-import { User, Building2, Calendar, Award, FileText, Clock, Shield, Users } from 'lucide-react';
+import { User, Building2,CreditCard  , Calendar, Award, FileText, Clock, Shield, Users, Mail, IdCard, Briefcase } from 'lucide-react';
 
 interface Employee {
   id: string;
@@ -18,9 +18,6 @@ interface Employee {
   solde_conge: number;
   responsable_id?: string;
   is_super_admin?: boolean;
-  email?: string;
-  telephone?: string;
-  userId?: string;
 }
 
 interface UserProfile {
@@ -28,9 +25,6 @@ interface UserProfile {
   email: string;
   role?: string;
   is_super_admin?: boolean;
-  nom?: string;
-  prenom?: string;
-  entreprise?: string;
 }
 
 interface LeaveStats {
@@ -72,38 +66,25 @@ export function Profile() {
     if (!userProfile?.uid) return;
 
     try {
-      // Rechercher l'employé par userId dans la collection employes
-      const q = query(
-        collection(db, 'employes'), 
-        where('userId', '==', userProfile.uid)
-      );
+      // Try to find employee by matching user ID or email
+      const q = query(collection(db, 'employes'));
       const querySnapshot = await getDocs(q);
       
-      if (!querySnapshot.empty) {
-        const employeDoc = querySnapshot.docs[0];
-        const employeeData = { id: employeDoc.id, ...employeDoc.data() } as Employee;
+      let employeeData = null;
+      querySnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        // You might need to adjust this logic based on how you link users to employees
+        if (data.email === userProfile.email || doc.id === userProfile.uid) {
+          employeeData = { id: doc.id, ...data } as Employee;
+        }
+      });
+
+      if (employeeData) {
         setEmployee(employeeData);
         
         // Fetch manager info if employee has a responsable_id
         if (employeeData.responsable_id) {
           await fetchManagerInfo(employeeData.responsable_id);
-        }
-      } else {
-        // Fallback: essayer de trouver par email si userId n'est pas trouvé
-        const qEmail = query(
-          collection(db, 'employes'), 
-          where('email', '==', userProfile.email)
-        );
-        const emailSnapshot = await getDocs(qEmail);
-        
-        if (!emailSnapshot.empty) {
-          const employeDoc = emailSnapshot.docs[0];
-          const employeeData = { id: employeDoc.id, ...employeDoc.data() } as Employee;
-          setEmployee(employeeData);
-          
-          if (employeeData.responsable_id) {
-            await fetchManagerInfo(employeeData.responsable_id);
-          }
         }
       }
     } catch (error) {
@@ -113,34 +94,14 @@ export function Profile() {
 
   const fetchManagerInfo = async (managerId: string) => {
     try {
-      // Essayer d'abord de trouver le manager par son ID dans employes
       const managerDoc = await getDoc(doc(db, 'employes', managerId));
       if (managerDoc.exists()) {
         const managerData = managerDoc.data();
         setManager({
-          nom: managerData.nom || '',
-          prenom: managerData.prenom || '',
-          email: managerData.email || '',
-          poste: managerData.poste || ''
-        });
-        return;
-      }
-      
-      // Fallback: chercher par userId si l'ID direct ne fonctionne pas
-      const q = query(
-        collection(db, 'employes'), 
-        where('userId', '==', managerId)
-      );
-      const querySnapshot = await getDocs(q);
-      
-      if (!querySnapshot.empty) {
-        const managerDoc = querySnapshot.docs[0];
-        const managerData = managerDoc.data();
-        setManager({
-          nom: managerData.nom || '',
-          prenom: managerData.prenom || '',
-          email: managerData.email || '',
-          poste: managerData.poste || ''
+          nom: managerData.nom,
+          prenom: managerData.prenom,
+          email: managerData.email,
+          poste: managerData.poste
         });
       }
     } catch (error) {
@@ -165,7 +126,7 @@ export function Profile() {
         pending: leaves.filter(l => l.statut === 'en_attente').length,
         approved: leaves.filter(l => l.statut === 'accepte').length,
         rejected: leaves.filter(l => l.statut === 'refuse').length,
-        used: leaves.filter(l => l.statut === 'accepte').reduce((sum, leave) => sum + (leave.duree || 0), 0),
+        used: leaves.filter(l => l.statut === 'accepte').length, // Simplified calculation
       };
 
       setLeaveStats(stats);
@@ -178,8 +139,13 @@ export function Profile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          </div>
+          <p className="text-gray-600">Chargement du profil...</p>
+        </div>
       </div>
     );
   }
@@ -187,229 +153,262 @@ export function Profile() {
   const isSuperAdmin = userProfile?.is_super_admin || employee?.is_super_admin;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-3">
-        <User className="h-8 w-8 text-blue-600" />
-        <h1 className="text-3xl font-bold text-gray-900">Mon Profil</h1>
-        {isSuperAdmin && (
-          <Badge variant="default" className="bg-purple-100 text-purple-800 border-purple-200">
-            <Shield className="h-3 w-3 mr-1" />
-            Super Admin
-          </Badge>
-        )}
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center space-x-3">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl">
+            <User className="h-7 w-7 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Mon Profil</h1>
+          {isSuperAdmin && (
+            <Badge variant="default" className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 px-3 py-1">
+              <Shield className="h-3 w-3 mr-1" />
+              Super Admin
+            </Badge>
+          )}
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Information */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Informations personnelles
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {employee ? (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Nom complet
-                      </label>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {employee.prenom} {employee.nom}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
-                        CIN
-                      </label>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {employee.cin || 'Non renseigné'}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Email
-                      </label>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {employee.email || userProfile?.email}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Poste
-                      </label>
-                      <Badge variant="default" className="text-sm px-3 py-1">
-                        {employee.poste}
-                      </Badge>
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Profile Information */}
+          <div className="lg:col-span-2">
+            <Card className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20">
+              <CardHeader className="border-b border-gray-200/50">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
+                    <User className="h-5 w-5 text-white" />
                   </div>
-                  
-                  <div className="border-t pt-6">
+                  Informations personnelles
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {employee ? (
+                  <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">
-                          <Building2 className="inline h-4 w-4 mr-1" />
-                          Entreprise
+                      <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/50">
+                        <label className="block text-sm font-medium text-gray-600 mb-2 flex items-center">
+                          <User className="h-4 w-4 mr-1" />
+                          Nom complet
                         </label>
                         <div className="text-lg font-semibold text-gray-900">
-                          {employee.entreprise}
+                          {employee.prenom} {employee.nom}
                         </div>
                       </div>
                       
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">
-                          <Calendar className="inline h-4 w-4 mr-1" />
-                          Date d'embauche
+                      <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/50">
+                        <label className="block text-sm font-medium text-gray-600 mb-2 flex items-center">
+                          <CreditCard   className="h-4 w-4 mr-1" />
+                          CIN
                         </label>
                         <div className="text-lg font-semibold text-gray-900">
-                          {employee.date_embauche ? formatDate(employee.date_embauche) : 'Non renseignée'}
+                          {employee.cin}
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/50">
+                        <label className="block text-sm font-medium text-gray-600 mb-2 flex items-center">
+                          <Mail className="h-4 w-4 mr-1" />
+                          Email
+                        </label>
+                        <div className="text-lg font-semibold text-gray-900">
+                          {userProfile?.email}
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/50">
+                        <label className="block text-sm font-medium text-gray-600 mb-2 flex items-center">
+                          <Briefcase className="h-4 w-4 mr-1" />
+                          Poste
+                        </label>
+                        <Badge variant="default" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 text-sm">
+                          {employee.poste}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-gray-200/50 pt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/50">
+                          <label className="block text-sm font-medium text-gray-600 mb-2 flex items-center">
+                            <Building2 className="h-4 w-4 mr-1" />
+                            Entreprise
+                          </label>
+                          <div className="text-lg font-semibold text-gray-900">
+                            {employee.entreprise}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/50">
+                          <label className="block text-sm font-medium text-gray-600 mb-2 flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            Date d'embauche
+                          </label>
+                          <div className="text-lg font-semibold text-gray-900">
+                            {formatDate(employee.date_embauche)}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Manager Information */}
-                  {manager && (
-                    <div className="border-t pt-6">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <Users className="h-5 w-5 mr-2 text-blue-500" />
-                        Responsable hiérarchique
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-600 mb-1">
-                            Nom complet
-                          </label>
-                          <div className="text-lg font-semibold text-gray-900">
-                            {manager.prenom} {manager.nom}
+                    {/* Manager Information */}
+                    {manager && (
+                      <div className="border-t border-gray-200/50 pt-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                          <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg mr-3">
+                            <Users className="h-5 w-5 text-white" />
                           </div>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-600 mb-1">
-                            Poste
-                          </label>
-                          <div className="text-lg font-semibold text-gray-900">
-                            {manager.poste}
+                          Responsable hiérarchique
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200/50">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">
+                              Nom complet
+                            </label>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {manager.prenom} {manager.nom}
+                            </div>
                           </div>
-                        </div>
-                        
-                        {manager.email && (
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">
+                          
+                          <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200/50">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">
+                              Poste
+                            </label>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {manager.poste}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200/50 md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">
                               Email
                             </label>
                             <div className="text-lg font-semibold text-gray-900">
                               {manager.email}
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Super Admin Information */}
-                  {isSuperAdmin && (
-                    <div className="border-t pt-6">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <Shield className="h-5 w-5 mr-2 text-purple-500" />
-                        Privilèges Super Admin
-                      </h3>
-                      <div className="bg-purple-50 p-4 rounded-lg">
-                        <p className="text-purple-800">
-                          Vous avez accès à toutes les fonctionnalités administratives du système.
-                          Vous pouvez gérer les employés, les congés, et les paramètres de l'application.
-                        </p>
+                    {/* Super Admin Information */}
+                    {isSuperAdmin && (
+                      <div className="border-t border-gray-200/50 pt-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                          <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg mr-3">
+                            <Shield className="h-5 w-5 text-white" />
+                          </div>
+                          Privilèges Super Admin
+                        </h3>
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200/50">
+                          <p className="text-purple-800">
+                            Vous avez accès à toutes les fonctionnalités administratives du système.
+                            Vous pouvez gérer les employés, les congés, et les paramètres de l'application.
+                          </p>
+                        </div>
                       </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-4 rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <User className="h-8 w-8 text-gray-400" />
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-600">
-                    Profil employé non trouvé. Contactez votre responsable.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    <p className="text-gray-600">
+                      Profil employé non trouvé. Contactez votre responsable.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Leave Balance & Stats */}
-        <div className="space-y-6">
-          {/* Leave Balance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-green-600" />
-                Solde de congés
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-green-600 mb-2">
-                  {employee?.solde_conge || 0}
-                </div>
-                <div className="text-sm text-gray-600">
-                  jours disponibles
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Leave Statistics */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Statistiques
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total demandes</span>
-                  <Badge variant="default">{leaveStats.total}</Badge>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    En attente
-                  </span>
-                  <Badge variant="warning">{leaveStats.pending}</Badge>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Approuvées</span>
-                  <Badge variant="success">{leaveStats.approved}</Badge>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Refusées</span>
-                  <Badge variant="destructive">{leaveStats.rejected}</Badge>
-                </div>
-                
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-900">
-                      Jours utilisés cette année
-                    </span>
-                    <Badge variant="secondary" className="font-semibold">
-                      {leaveStats.used}
-                    </Badge>
+          {/* Leave Balance & Stats */}
+          <div className="space-y-6">
+            {/* Leave Balance */}
+            <Card className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20">
+              <CardHeader className="border-b border-gray-200/50">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-lg">
+                    <Award className="h-5 w-5 text-white" />
+                  </div>
+                  Solde de congés
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                    {employee?.solde_conge || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    jours disponibles
+                  </div>
+                  <div className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-xl border border-green-200/50">
+                    <p className="text-xs text-green-700">
+                      Votre solde de congés est mis à jour annuellement
+                    </p>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Leave Statistics */}
+            <Card className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20">
+              <CardHeader className="border-b border-gray-200/50">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
+                    <FileText className="h-5 w-5 text-white" />
+                  </div>
+                  Statistiques des congés
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-gray-50/50 rounded-xl">
+                    <span className="text-sm text-gray-600">Total demandes</span>
+                    <Badge variant="default" className="bg-gray-200 text-gray-800 px-3 py-1">
+                      {leaveStats.total}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-amber-50/50 rounded-xl">
+                    <span className="text-sm text-gray-600 flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-amber-600" />
+                      En attente
+                    </span>
+                    <Badge variant="warning" className="bg-amber-100 text-amber-800 px-3 py-1">
+                      {leaveStats.pending}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-green-50/50 rounded-xl">
+                    <span className="text-sm text-gray-600">Approuvées</span>
+                    <Badge variant="success" className="bg-green-100 text-green-800 px-3 py-1">
+                      {leaveStats.approved}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-red-50/50 rounded-xl">
+                    <span className="text-sm text-gray-600">Refusées</span>
+                    <Badge variant="destructive" className="bg-red-100 text-red-800 px-3 py-1">
+                      {leaveStats.rejected}
+                    </Badge>
+                  </div>
+                  
+                  <div className="border-t border-gray-200/50 pt-4">
+                    <div className="flex justify-between items-center p-3 bg-blue-50/50 rounded-xl">
+                      <span className="text-sm font-medium text-gray-900">
+                        Jours utilisés cette année
+                      </span>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 px-3 py-1 font-semibold">
+                        {leaveStats.used}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+          
+          </div>
         </div>
       </div>
     </div>
