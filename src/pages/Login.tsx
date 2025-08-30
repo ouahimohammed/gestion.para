@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { Eye, EyeOff, Mail, Lock, Shield, User, Building, Loader2, ArrowRight, Sparkles, CheckCircle, Users, BarChart3, Calendar } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Shield, User, Building, Loader2, ArrowRight, Sparkles, CheckCircle, Users, BarChart3, Calendar, Rocket, Crown, Target, Zap, Globe, Cloud, FileText, Bell, TrendingUp } from 'lucide-react';
 import { useToast } from '../components/ui/use-toast';
 
 export function Login() {
@@ -15,6 +15,7 @@ export function Login() {
   const [error, setError] = useState('');
   const [isHovered, setIsHovered] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showPresentation, setShowPresentation] = useState(true);
 
   const { user, userProfile, loading, signIn } = useAuth();
   const { toast } = useToast();
@@ -41,7 +42,7 @@ export function Login() {
       await signIn(email, password);
       toast({
         title: "Connexion réussie",
-        description: `Bienvenue !`,
+        description: `Bienvenue dans SGRH-Holding !`,
       });
     } catch (err: any) {
       console.error("Erreur de connexion:", err);
@@ -56,7 +57,6 @@ export function Login() {
     }
   };
 
-  
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
@@ -90,46 +90,66 @@ export function Login() {
           <div className="w-full lg:w-1/2 text-center lg:text-left space-y-8">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-blue-200/50 shadow-sm">
-                <Sparkles className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">Plateforme RH nouvelle génération</span>
+                <Rocket className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">SGRH-Holding • Plateforme RH nouvelle génération</span>
               </div>
               
               <h1 className="text-4xl lg:text-6xl font-bold text-slate-900 leading-tight">
                 Bienvenue sur{' '}
                 <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  HR Manager
+                  SGRH-Holding
                 </span>
               </h1>
               
               <p className="text-xl lg:text-2xl text-slate-600 leading-relaxed">
-                Transformez la gestion de vos ressources humaines avec une solution moderne et intuitive
+                Système de Gestion des Ressources Humaines pour Soft Medical Holding
               </p>
             </div>
             
+            {/* Presentation Card */}
+          
             {/* Features showcase */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
               <FeatureCard 
-                icon={<Users className="h-6 w-6" />}
-                title="Gestion des équipes"
-                description="Organisez et suivez vos collaborateurs"
+                icon={<Target className="h-6 w-6" />}
+                title="Gestion Multi-Sociétés"
+                description="Medical, Alougoum, Paramedic - Administration centralisée"
                 color="blue"
               />
               <FeatureCard 
-                icon={<BarChart3 className="h-6 w-6" />}
-                title="Analyses avancées"
-                description="Tableaux de bord et rapports détaillés"
+                icon={<TrendingUp className="h-6 w-6" />}
+                title="Workflows Intelligents"
+                description="Demandes de congés avec validation hiérarchique"
                 color="indigo"
               />
               <FeatureCard 
-                icon={<Calendar className="h-6 w-6" />}
-                title="Planning intelligent"
-                description="Gestion des congés et planification"
+                icon={<BarChart3 className="h-6 w-6" />}
+                title="Analyses Avancées"
+                description="Tableaux de bord et rapports détaillés"
+                color="purple"
+              />
+              <FeatureCard 
+                icon={<FileText className="h-6 w-6" />}
+                title="Export PDF/Excel"
+                description="Rapports RH et gestion des dépenses"
+                color="blue"
+              />
+              <FeatureCard 
+                icon={<Bell className="h-6 w-6" />}
+                title="Notifications Temps Réel"
+                description="Alertes FCM pour demandes et approbations"
+                color="indigo"
+              />
+              <FeatureCard 
+                icon={<Globe className="h-6 w-6" />}
+                title="Accès Différencié"
+                description="Super Admin, Responsable, Employé"
                 color="purple"
               />
             </div>
 
-            {/* Role showcase for larger screens */}
-         
+            {/* Technologies showcase */}
+             
           </div>
 
           {/* Right side - Enhanced Login Form */}
@@ -237,7 +257,12 @@ export function Login() {
                   </Button>
                 </form>
                 
-                
+                <div className="mt-6 p-4 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl border border-slate-200/50">
+                  <p className="text-sm text-slate-600 text-center">
+                    <strong>Développé  par :</strong> Mohamed Ouahi
+                    <br />
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -273,34 +298,13 @@ function FeatureCard({ icon, title, description, color }: {
   );
 }
 
-// Enhanced Role Card Component
-function RoleCard({ icon, title, description, color, onClick }: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  color: 'red' | 'green' | 'blue';
-  onClick: () => void;
-}) {
-  const colorClasses = {
-    red: 'from-red-500 to-red-600 hover:from-red-600 hover:to-red-700',
-    green: 'from-green-500 to-green-600 hover:from-green-600 hover:to-green-700',
-    blue: 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
-  };
-
+// Tech Pill Component
+function TechPill({ icon, name }: { icon: string; name: string }) {
   return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group text-left"
-    >
-      <div className={`w-12 h-12 bg-gradient-to-r ${colorClasses[color]} rounded-xl flex items-center justify-center text-white shadow-lg transition-transform duration-200 group-hover:scale-110`}>
-        {icon}
-      </div>
-      <div className="flex-1">
-        <h3 className="font-semibold text-slate-900 group-hover:text-slate-700 transition-colors">{title}</h3>
-        <p className="text-sm text-slate-600">{description}</p>
-      </div>
-      <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 transition-all duration-200 group-hover:translate-x-1" />
-    </button>
+    <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200/70 shadow-xs">
+      <span className="text-sm">{icon}</span>
+      <span className="text-xs font-medium text-slate-700">{name}</span>
+    </div>
   );
 }
 
