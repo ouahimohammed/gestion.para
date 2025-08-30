@@ -1122,10 +1122,12 @@ const KitchenManagement: React.FC = () => {
   // Vérifier les autorisations
   if (!['super_admin', 'responsable', 'employe'].includes(userProfile?.role || '')) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-md p-8 text-center max-w-md w-full">
-          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Accès refusé</h2>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-xl p-8 text-center max-w-md w-full border border-white/20">
+          <div className="bg-gradient-to-r from-red-500 to-pink-600 p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-4">Accès refusé</h2>
           <p className="text-gray-600">
             Vous n'avez pas les autorisations nécessaires pour accéder à ce module.
           </p>
@@ -1137,9 +1139,11 @@ const KitchenManagement: React.FC = () => {
   // Écran de chargement
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="h-8 w-8 text-white animate-spin" />
+          </div>
           <p className="text-gray-600">Chargement des données...</p>
         </div>
       </div>
@@ -1149,14 +1153,16 @@ const KitchenManagement: React.FC = () => {
   // Écran d'erreur
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-md p-8 text-center max-w-md w-full">
-          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Erreur</h2>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-xl p-8 text-center max-w-md w-full border border-white/20">
+          <div className="bg-gradient-to-r from-red-500 to-pink-600 p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-4">Erreur</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
           >
             Recharger la page
           </button>
@@ -1168,14 +1174,18 @@ const KitchenManagement: React.FC = () => {
   const availableTabs = getAvailableTabs();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <Toaster 
         position="top-right"
         toastOptions={{
           duration: 4000,
           style: {
-            background: '#363636',
-            color: '#fff',
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            color: '#1F2937',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
           },
           success: {
             duration: 3000,
@@ -1195,19 +1205,21 @@ const KitchenManagement: React.FC = () => {
       />
 
       {/* Navbar */}
-      <nav className="bg-white shadow-md border-b border-gray-200">
+      <nav className="bg-white/90 backdrop-blur-lg shadow-md border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between h-auto md:h-16 py-3 md:py-0">
             <div className="flex items-center mb-3 md:mb-0">
               <div className="flex-shrink-0 flex items-center">
-                <ShoppingCart className="h-8 w-8 text-blue-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl">
+                  <ShoppingCart className="h-7 w-7 text-white" />
+                </div>
+                <span className="ml-3 text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   {userProfile?.role === 'employe' ? 'Mes Achats Quotidiens' : 'Suivi Achats & Dépenses'}
                 </span>
               </div>
               {/* Indicateur d'entreprise autorisée */}
               {canViewProductsAndCategories() && (
-                <div className="ml-4 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                <div className="ml-4 px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-full text-sm font-medium border border-green-200/50">
                   <CheckCircle className="h-4 w-4 inline mr-1" />
                   Entreprise autorisée
                 </div>
@@ -1216,14 +1228,14 @@ const KitchenManagement: React.FC = () => {
 
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
               {/* Onglets de navigation */}
-              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+              <div className="flex space-x-1 bg-gray-100 rounded-xl p-1">
                 {availableTabs.map(({ key, label, icon: Icon }) => (
                   <button
                     key={key}
-                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                       activeTab === key
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
                     }`}
                     onClick={() => setActiveTab(key as any)}
                   >
@@ -1237,9 +1249,11 @@ const KitchenManagement: React.FC = () => {
               <div className="flex items-center space-x-2">
                 {userProfile?.role === 'super_admin' && (
                   <div className="flex items-center">
-                    <Filter className="mr-2 h-4 w-4 text-gray-500" />
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-1.5 rounded-lg mr-2">
+                      <Filter className="h-4 w-4 text-white" />
+                    </div>
                     <select
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+                      className="px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white/80 backdrop-blur-sm"
                       value={selectedCompany}
                       onChange={(e) => setSelectedCompany(e.target.value)}
                     >
@@ -1255,7 +1269,7 @@ const KitchenManagement: React.FC = () => {
 
                 {userProfile?.role !== 'employe' && (
                   <button
-                    className="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={generatePDFReport}
                     disabled={generatingPDF}
                   >
@@ -1277,7 +1291,7 @@ const KitchenManagement: React.FC = () => {
 
       {/* Message d'information pour les entreprises non autorisées */}
       {!canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
-        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mx-4 mt-4 rounded-r-lg">
+        <div className="bg-amber-50/80 backdrop-blur-sm border-l-4 border-amber-400 p-4 mx-4 mt-4 rounded-r-xl">
           <div className="flex">
             <div className="flex-shrink-0">
               <AlertTriangle className="h-5 w-5 text-amber-400" />
@@ -1300,7 +1314,7 @@ const KitchenManagement: React.FC = () => {
           <div className="px-4 py-6 sm:px-0">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   {userProfile?.role === 'employe' ? 'Mes Achats Quotidiens' : 'Gestion des Achats'}
                 </h2>
                 {userProfile?.role === 'employe' && (
@@ -1312,11 +1326,13 @@ const KitchenManagement: React.FC = () => {
               
               <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-500 p-1 rounded-lg">
+                    <Search className="h-4 w-4 text-white" />
+                  </div>
                   <input
                     type="text"
                     placeholder="Rechercher un achat..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                    className="pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-white/80 backdrop-blur-sm"
                     value={purchaseSearch}
                     onChange={(e) => setPurchaseSearch(e.target.value)}
                   />
@@ -1324,7 +1340,7 @@ const KitchenManagement: React.FC = () => {
 
                 <div className="flex gap-2">
                   <select
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white"
+                    className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white/80 backdrop-blur-sm"
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
                   >
@@ -1335,7 +1351,7 @@ const KitchenManagement: React.FC = () => {
                   </select>
 
                   <select
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white"
+                    className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white/80 backdrop-blur-sm"
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
                   >
@@ -1346,7 +1362,7 @@ const KitchenManagement: React.FC = () => {
                   </select>
 
                   <button
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                     onClick={handleAddPurchase}
                   >
                     <Plus size={16} />
@@ -1359,9 +1375,11 @@ const KitchenManagement: React.FC = () => {
 
             {/* Cartes de résumé */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <ShoppingCart className="h-8 w-8 text-blue-600" />
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-xl">
+                    <ShoppingCart className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">{filteredPurchases.length}</p>
                     <p className="text-sm text-gray-600">
@@ -1371,9 +1389,11 @@ const KitchenManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-green-600" />
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 rounded-xl">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
                       {filteredPurchases.reduce((sum, p) => sum + p.total, 0).toFixed(0)} DH
@@ -1383,9 +1403,11 @@ const KitchenManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <Tag className="h-8 w-8 text-purple-600" />
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl">
+                    <Tag className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
                       {Array.from(new Set(filteredPurchases.map(p => p.categoryId))).length}
@@ -1395,9 +1417,11 @@ const KitchenManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-amber-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <Package2 className="h-8 w-8 text-amber-600" />
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-3 rounded-xl">
+                    <Package2 className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
                       {filteredPurchases.length > 0 ? (filteredPurchases.reduce((sum, p) => sum + p.total, 0) / filteredPurchases.length).toFixed(0) : 0} DH
@@ -1409,50 +1433,50 @@ const KitchenManagement: React.FC = () => {
             </div>
 
             {/* Tableau des achats */}
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-white/90 backdrop-blur-lg shadow-lg rounded-2xl overflow-hidden border border-white/20">
               {filteredPurchases.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-50/80 backdrop-blur-sm">
                       <tr>
                         {userProfile?.role === 'super_admin' && (
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Société
                           </th>
                         )}
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Date
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Article
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Catégorie
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Quantité
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           P.U.
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Total
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Fournisseur
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredPurchases.map((purchase, index) => (
-                        <tr key={purchase.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                        <tr key={purchase.id} className={`hover:bg-gray-50/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                           {userProfile?.role === 'super_admin' && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               <span 
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium shadow-sm"
                                 style={{ 
                                   backgroundColor: getCompanyColor(purchase.companyId),
                                   color: 'white'
@@ -1479,7 +1503,7 @@ const KitchenManagement: React.FC = () => {
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               {purchase.categoryName || 'Non catégorisé'}
                             </span>
                           </td>
@@ -1499,7 +1523,7 @@ const KitchenManagement: React.FC = () => {
                             <div className="flex items-center space-x-2">
                               {(userProfile?.role !== 'employe' || purchase.createdBy === userProfile?.userId) && (
                                 <button
-                                  className="text-blue-600 hover:text-blue-900 transition-colors"
+                                  className="text-blue-600 hover:text-blue-900 transition-colors p-1.5 rounded-lg hover:bg-blue-50"
                                   onClick={() => handleEditPurchase(purchase)}
                                   title="Modifier"
                                 >
@@ -1508,7 +1532,7 @@ const KitchenManagement: React.FC = () => {
                               )}
                               {(userProfile?.role !== 'employe' || purchase.createdBy === userProfile?.userId) && (
                                 <button
-                                  className="text-red-600 hover:text-red-900 transition-colors"
+                                  className="text-red-600 hover:text-red-900 transition-colors p-1.5 rounded-lg hover:bg-red-50"
                                   onClick={() => handleDeletePurchase(purchase.id)}
                                   title="Supprimer"
                                 >
@@ -1520,15 +1544,15 @@ const KitchenManagement: React.FC = () => {
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot className="bg-gray-50">
+                    <tfoot className="bg-gray-50/80 backdrop-blur-sm">
                       <tr>
                         <td 
                           colSpan={userProfile?.role === 'super_admin' ? 8 : 7} 
-                          className="px-6 py-3 text-right text-sm font-medium text-gray-900"
+                          className="px-6 py-4 text-right text-sm font-medium text-gray-900"
                         >
                           Total ({getSelectedPeriodLabel()}):
                         </td>
-                        <td className="px-6 py-3 text-sm font-bold text-green-600">
+                        <td className="px-6 py-4 text-sm font-bold text-green-600">
                           {filteredPurchases.reduce((sum, p) => sum + p.total, 0).toFixed(2)} DH
                         </td>
                         <td></td>
@@ -1538,7 +1562,9 @@ const KitchenManagement: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <ShoppingCart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <ShoppingCart className="h-8 w-8 text-blue-600" />
+                  </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     {userProfile?.role === 'employe' ? 'Aucun achat enregistré' : 'Aucun achat trouvé'}
                   </h3>
@@ -1549,7 +1575,7 @@ const KitchenManagement: React.FC = () => {
                     }
                   </p>
                   <button
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                     onClick={handleAddPurchase}
                   >
                     <Plus className="mr-2 h-4 w-4" />
@@ -1568,15 +1594,17 @@ const KitchenManagement: React.FC = () => {
         {activeTab === 'products' && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
           <div className="px-4 py-6 sm:px-0">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-              <h2 className="text-3xl font-bold text-gray-800">Gestion des Produits</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Gestion des Produits</h2>
               
               <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-500 p-1 rounded-lg">
+                    <Search className="h-4 w-4 text-white" />
+                  </div>
                   <input
                     type="text"
                     placeholder="Rechercher un produit..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                    className="pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-white/80 backdrop-blur-sm"
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
                   />
@@ -1584,7 +1612,7 @@ const KitchenManagement: React.FC = () => {
 
                 <div className="flex gap-2">
                   <select
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white"
+                    className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white/80 backdrop-blur-sm"
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
                   >
@@ -1595,7 +1623,7 @@ const KitchenManagement: React.FC = () => {
                   </select>
 
                   <button
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50"
                     onClick={initializeDefaultProducts}
                     disabled={initializingProducts}
                   >
@@ -1610,7 +1638,7 @@ const KitchenManagement: React.FC = () => {
                   </button>
 
                   <button
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                     onClick={handleAddProduct}
                   >
                     <Plus size={16} />
@@ -1623,7 +1651,7 @@ const KitchenManagement: React.FC = () => {
 
             {/* Section Select des produits groupés par catégorie */}
             {products.length > 0 && (
-              <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg mb-6 border border-white/20">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Sélectionner un produit existant</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1631,7 +1659,7 @@ const KitchenManagement: React.FC = () => {
                       Produit
                     </label>
                     <select
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                       value={selectedProduct}
                       onChange={(e) => setSelectedProduct(e.target.value)}
                     >
@@ -1649,7 +1677,7 @@ const KitchenManagement: React.FC = () => {
                   </div>
                   <div className="flex items-end">
                     {selectedProduct && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex-1">
+                      <div className="p-4 bg-blue-50/80 backdrop-blur-sm rounded-xl border border-blue-200 flex-1">
                         <p className="text-sm text-blue-800">
                           <strong>Produit sélectionné :</strong> {products.find(p => p.id === selectedProduct)?.name}
                         </p>
@@ -1664,30 +1692,30 @@ const KitchenManagement: React.FC = () => {
             )}
 
             {/* Liste des produits */}
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-white/90 backdrop-blur-lg shadow-lg rounded-2xl overflow-hidden border border-white/20">
               {filteredProducts.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-50/80 backdrop-blur-sm">
                       <tr>
                         {userProfile?.role === 'super_admin' && (
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Société
                           </th>
                         )}
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Nom
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Catégorie
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Nombre d'achats
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Date création
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -1697,11 +1725,11 @@ const KitchenManagement: React.FC = () => {
                         const productPurchases = purchases.filter(p => p.productId === product.id);
                         
                         return (
-                          <tr key={product.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                          <tr key={product.id} className={`hover:bg-gray-50/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                             {userProfile?.role === 'super_admin' && (
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <span 
-                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium shadow-sm"
                                   style={{ 
                                     backgroundColor: getCompanyColor(product.companyId),
                                     color: 'white'
@@ -1714,14 +1742,16 @@ const KitchenManagement: React.FC = () => {
                             )}
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <Package className="h-5 w-5 text-blue-500 mr-3" />
+                                <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg mr-3">
+                                  <Package className="h-4 w-4 text-white" />
+                                </div>
                                 <div className="text-sm font-medium text-gray-900">
                                   {product.name}
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {product.categoryName || 'Non catégorisé'}
                               </span>
                             </td>
@@ -1734,14 +1764,14 @@ const KitchenManagement: React.FC = () => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex items-center space-x-2">
                                 <button
-                                  className="text-blue-600 hover:text-blue-900 transition-colors"
+                                  className="text-blue-600 hover:text-blue-900 transition-colors p-1.5 rounded-lg hover:bg-blue-50"
                                   onClick={() => handleEditProduct(product)}
                                   title="Modifier"
                                 >
                                   <Edit size={16} />
                                 </button>
                                 <button
-                                  className="text-red-600 hover:text-red-900 transition-colors"
+                                  className="text-red-600 hover:text-red-900 transition-colors p-1.5 rounded-lg hover:bg-red-50"
                                   onClick={() => handleDeleteProduct(product.id)}
                                   title="Supprimer"
                                   disabled={productPurchases.length > 0}
@@ -1758,12 +1788,14 @@ const KitchenManagement: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <Package className="h-8 w-8 text-blue-600" />
+                  </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun produit trouvé</h3>
                   <p className="text-gray-500 mb-4">Créez des produits pour faciliter la saisie de vos achats.</p>
                   <div className="flex justify-center gap-3">
                     <button
-                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50"
                       onClick={initializeDefaultProducts}
                       disabled={initializingProducts}
                     >
@@ -1775,7 +1807,7 @@ const KitchenManagement: React.FC = () => {
                       {initializingProducts ? 'Initialisation...' : 'Créer les produits par défaut'}
                     </button>
                     <button
-                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                       onClick={handleAddProduct}
                     >
                       <Plus className="mr-2 h-4 w-4" />
@@ -1792,10 +1824,10 @@ const KitchenManagement: React.FC = () => {
         {activeTab === 'categories' && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
           <div className="px-4 py-6 sm:px-0">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-              <h2 className="text-3xl font-bold text-gray-800">Gestion des Catégories</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Gestion des Catégories</h2>
               
               <button
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                 onClick={() => setShowCategoryModal(true)}
               >
                 <Plus size={16} />
@@ -1804,28 +1836,28 @@ const KitchenManagement: React.FC = () => {
             </div>
 
             {/* Liste des catégories */}
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-white/90 backdrop-blur-lg shadow-lg rounded-2xl overflow-hidden border border-white/20">
               {categories.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-50/80 backdrop-blur-sm">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Nom
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Nombre d'achats
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Nombre de produits
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Total dépenses
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Date création
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -1837,10 +1869,12 @@ const KitchenManagement: React.FC = () => {
                         const totalSpent = categoryPurchases.reduce((sum, p) => sum + p.total, 0);
                         
                         return (
-                          <tr key={category.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                          <tr key={category.id} className={`hover:bg-gray-50/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <Tag className="h-5 w-5 text-blue-500 mr-3" />
+                                <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg mr-3">
+                                  <Tag className="h-4 w-4 text-white" />
+                                </div>
                                 <div className="text-sm font-medium text-gray-900">
                                   {category.name}
                                   {category.global && (
@@ -1866,7 +1900,7 @@ const KitchenManagement: React.FC = () => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               {(userProfile?.role === 'super_admin' || !category.global) && (
                                 <button
-                                  className="text-red-600 hover:text-red-900 transition-colors"
+                                  className="text-red-600 hover:text-red-900 transition-colors p-1.5 rounded-lg hover:bg-red-50"
                                   onClick={() => handleDeleteCategory(category.id)}
                                   title="Supprimer"
                                   disabled={categoryPurchases.length > 0 || categoryProducts.length > 0}
@@ -1883,11 +1917,13 @@ const KitchenManagement: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <Tag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <Tag className="h-8 w-8 text-blue-600" />
+                  </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune catégorie trouvée</h3>
                   <p className="text-gray-500 mb-4">Créez des catégories pour organiser vos achats.</p>
                   <button
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                     onClick={() => setShowCategoryModal(true)}
                   >
                     <Plus className="mr-2 h-4 w-4" />
@@ -1903,11 +1939,11 @@ const KitchenManagement: React.FC = () => {
         {activeTab === 'reports' && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
           <div className="px-4 py-6 sm:px-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <h2 className="text-3xl font-bold text-gray-800">Rapports et Statistiques</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Rapports et Statistiques</h2>
               
               <div className="flex items-center gap-2">
                 <select
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 backdrop-blur-sm"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                 >
@@ -1918,7 +1954,7 @@ const KitchenManagement: React.FC = () => {
                 </select>
                 
                 <button
-                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={generatePDFReport}
                   disabled={generatingPDF}
                 >
@@ -1934,9 +1970,11 @@ const KitchenManagement: React.FC = () => {
 
             {/* Cartes de statistiques */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <ShoppingCart className="h-8 w-8 text-blue-600" />
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-xl">
+                    <ShoppingCart className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">{filteredPurchases.length}</p>
                     <p className="text-sm text-gray-600">Achats totaux</p>
@@ -1944,9 +1982,11 @@ const KitchenManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-green-600" />
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 rounded-xl">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
                       {filteredPurchases.reduce((sum, p) => sum + p.total, 0).toFixed(0)} DH
@@ -1956,9 +1996,11 @@ const KitchenManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <BarChart3 className="h-8 w-8 text-purple-600" />
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl">
+                    <BarChart3 className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
                       {filteredPurchases.length > 0 ? (filteredPurchases.reduce((sum, p) => sum + p.total, 0) / filteredPurchases.length).toFixed(0) : 0} DH
@@ -1968,9 +2010,11 @@ const KitchenManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-amber-500">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="flex items-center">
-                  <Calendar className="h-8 w-8 text-amber-600" />
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-3 rounded-xl">
+                    <Calendar className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">{getSelectedPeriodLabel()}</p>
                     <p className="text-sm text-gray-600">Période analysée</p>
@@ -1982,7 +2026,7 @@ const KitchenManagement: React.FC = () => {
             {/* Graphiques et analyses */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Répartition par catégorie */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Répartition par Catégorie</h3>
                 <div className="space-y-3">
                   {getCategoryStats().map((stat) => (
@@ -1990,7 +2034,7 @@ const KitchenManagement: React.FC = () => {
                       <div className="w-24 text-sm text-gray-700 truncate">{stat.name}</div>
                       <div className="flex-1 mx-3 h-4 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
+                          className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-500 rounded-full"
                           style={{ width: `${stat.percentage}%` }}
                         ></div>
                       </div>
@@ -2003,7 +2047,7 @@ const KitchenManagement: React.FC = () => {
               </div>
 
               {/* Articles les plus achetés */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Articles les Plus Achetés</h3>
                 <div className="space-y-3">
                   {Array.from(
@@ -2036,7 +2080,7 @@ const KitchenManagement: React.FC = () => {
             </div>
 
             {/* Résumé détaillé */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white/90 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/20">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Résumé Détaillé</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -2045,7 +2089,7 @@ const KitchenManagement: React.FC = () => {
                   <ul className="text-sm text-gray-600 space-y-1">
                     <li>• Total achats: {filteredPurchases.length}</li>
                     <li>• Montant total: {filteredPurchases.reduce((sum, p) => sum + p.total, 0).toFixed(2)} DH</li>
-                    <li>• Achat moyen: {filteredPurchases.length > 0 ? (filteredPurchases.reduce((sum, p) => sum + p.total, 0) / filteredPurchases.length).toFixed(2) : 0} DH</li>
+                    <li>• Achat moyenne: {filteredPurchases.length > 0 ? (filteredPurchases.reduce((sum, p) => sum + p.total, 0) / filteredPurchases.length).toFixed(2) : 0} DH</li>
                     <li>• Articles différents: {Array.from(new Set(filteredPurchases.map(p => p.itemName))).length}</li>
                   </ul>
                 </div>
@@ -2098,15 +2142,15 @@ const KitchenManagement: React.FC = () => {
 
       {/* Modal pour les achats */}
       {showPurchaseModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-white/20">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingItem ? "Modifier l'achat" : "Nouvel achat"}
               </h3>
               <button
                 onClick={() => setShowPurchaseModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-lg hover:bg-gray-100"
               >
                 <X size={20} />
               </button>
@@ -2115,10 +2159,10 @@ const KitchenManagement: React.FC = () => {
             <form onSubmit={(e) => { e.preventDefault(); handleSavePurchase(); }} className="space-y-6">
               {/* Section sélection de produit (seulement pour les entreprises autorisées) */}
               {canViewProductsAndCategories() && products.length > 0 && (
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="bg-blue-50/80 backdrop-blur-sm p-4 rounded-xl border border-blue-200">
                   <h4 className="text-sm font-medium text-blue-900 mb-3">Sélectionner un produit existant (optionnel)</h4>
                   <select
-                    className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                    className="w-full px-4 py-3 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.productId}
                     onChange={(e) => handleProductSelection(e.target.value)}
                   >
@@ -2144,7 +2188,7 @@ const KitchenManagement: React.FC = () => {
                   <input
                     type="text"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.itemName}
                     onChange={(e) => setPurchaseForm({...purchaseForm, itemName: e.target.value})}
                     placeholder="Ex: Pommes de terre, Viande hachée..."
@@ -2157,7 +2201,7 @@ const KitchenManagement: React.FC = () => {
                   </label>
                   <select
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.categoryId}
                     onChange={(e) => setPurchaseForm({...purchaseForm, categoryId: e.target.value})}
                   >
@@ -2194,7 +2238,7 @@ const KitchenManagement: React.FC = () => {
                     required
                     min="1"
                     step="0.01"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.quantity || 1}
                     onChange={(e) => setPurchaseForm({...purchaseForm, quantity: Number(e.target.value) || 1})}
                   />
@@ -2205,7 +2249,7 @@ const KitchenManagement: React.FC = () => {
                     Unité (optionnelle)
                   </label>
                   <select
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.unit || ''}
                     onChange={(e) => setPurchaseForm({...purchaseForm, unit: e.target.value})}
                   >
@@ -2230,7 +2274,7 @@ const KitchenManagement: React.FC = () => {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.unitPrice}
                     onChange={(e) => setPurchaseForm({...purchaseForm, unitPrice: Number(e.target.value)})}
                   />
@@ -2243,7 +2287,7 @@ const KitchenManagement: React.FC = () => {
                   <input
                     type="number"
                     readOnly
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-800 font-medium shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/80 backdrop-blur-sm text-gray-800 font-medium shadow-sm"
                     value={purchaseForm.total.toFixed(2)}
                   />
                   <p className="text-xs text-gray-500 mt-1">Calculé automatiquement</p>
@@ -2257,7 +2301,7 @@ const KitchenManagement: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.supplier || ''}
                     onChange={(e) => setPurchaseForm({...purchaseForm, supplier: e.target.value})}
                     placeholder="Ex: Marché Central, Carrefour..."
@@ -2271,7 +2315,7 @@ const KitchenManagement: React.FC = () => {
                   <input
                     type="date"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.date}
                     onChange={(e) => setPurchaseForm({...purchaseForm, date: e.target.value})}
                   />
@@ -2285,7 +2329,7 @@ const KitchenManagement: React.FC = () => {
                   </label>
                   <select
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={purchaseForm.companyId}
                     onChange={(e) => setPurchaseForm({...purchaseForm, companyId: e.target.value})}
                   >
@@ -2303,17 +2347,17 @@ const KitchenManagement: React.FC = () => {
                 </label>
                 <textarea
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                   value={purchaseForm.note || ''}
                   onChange={(e) => setPurchaseForm({...purchaseForm, note: e.target.value})}
                   placeholder="Notes complémentaires..."
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-6 border-t">
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
                 <button
                   type="button"
-                  className="px-6 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300"
                   onClick={() => setShowPurchaseModal(false)}
                 >
                   Annuler
@@ -2321,7 +2365,7 @@ const KitchenManagement: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -2338,15 +2382,15 @@ const KitchenManagement: React.FC = () => {
 
       {/* Modal pour ajouter un produit (seulement pour les entreprises autorisées et pas accessible aux employés) */}
       {showProductModal && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 w-full max-w-md border border-white/20">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingItem ? 'Modifier le produit' : 'Nouveau produit'}
               </h3>
               <button
                 onClick={() => setShowProductModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-lg hover:bg-gray-100"
               >
                 <X size={20} />
               </button>
@@ -2360,7 +2404,7 @@ const KitchenManagement: React.FC = () => {
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                   value={productForm.name}
                   onChange={(e) => setProductForm({...productForm, name: e.target.value})}
                   placeholder="Ex: Pomme de terre, Viande rouge..."
@@ -2373,7 +2417,7 @@ const KitchenManagement: React.FC = () => {
                 </label>
                 <select
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                   value={productForm.categoryId}
                   onChange={(e) => setProductForm({...productForm, categoryId: e.target.value})}
                 >
@@ -2406,7 +2450,7 @@ const KitchenManagement: React.FC = () => {
                   </label>
                   <select
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                     value={productForm.companyId}
                     onChange={(e) => setProductForm({...productForm, companyId: e.target.value})}
                   >
@@ -2418,10 +2462,10 @@ const KitchenManagement: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-6 border-t">
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
                 <button
                   type="button"
-                  className="px-6 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300"
                   onClick={() => setShowProductModal(false)}
                 >
                   Annuler
@@ -2429,7 +2473,7 @@ const KitchenManagement: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -2446,13 +2490,13 @@ const KitchenManagement: React.FC = () => {
 
       {/* Modal pour ajouter une catégorie (seulement pour les entreprises autorisées et pas accessible aux employés) */}
       {showCategoryModal && canViewProductsAndCategories() && userProfile?.role !== 'employe' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-white/20">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-900">Nouvelle catégorie</h3>
               <button
                 onClick={() => setShowCategoryModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-lg hover:bg-gray-100"
               >
                 <X size={20} />
               </button>
@@ -2466,17 +2510,17 @@ const KitchenManagement: React.FC = () => {
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="Ex: Légumes, Fruits, Viandes..."
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-6 border-t">
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
                 <button
                   type="button"
-                  className="px-6 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300"
                   onClick={() => setShowCategoryModal(false)}
                 >
                   Annuler
@@ -2484,7 +2528,7 @@ const KitchenManagement: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <Loader2 size={16} className="animate-spin" />
