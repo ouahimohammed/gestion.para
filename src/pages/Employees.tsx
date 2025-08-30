@@ -8,7 +8,7 @@ import { Label } from '../components/ui/Label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/Dialog';
 import { 
   collection, query, getDocs, where, addDoc, updateDoc, deleteDoc, doc 
-} from 'firebase/firestore';
+} from 'firebase/firestore'; 
 import { db } from '../lib/firebase';
 import { setDoc } from "firebase/firestore";
 import { formatDate } from '../lib/utils';
@@ -16,7 +16,7 @@ import {
   Plus, Edit, Trash2, User, Info, Search, Filter, UserPlus, X, 
   Phone, Mail, Building, Calendar, Briefcase, CreditCard,
   ChevronDown, ChevronUp, AlertCircle, Users, TrendingUp,
-  MapPin, Globe, Award, Clock
+  MapPin, Globe, Award, Clock, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 interface Employee {
@@ -53,6 +53,10 @@ export function Employees() {
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'ascending' });
   const [expandedEmployee, setExpandedEmployee] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  
+  // États pour la pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   
   const [formData, setFormData] = useState({
     nom: '',
@@ -102,7 +106,31 @@ export function Employees() {
     }
 
     setFilteredEmployees(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [employees, searchTerm, selectedCompany, sortConfig]);
+
+  // Calcul des données pour la pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+
+  // Fonction pour changer de page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Fonction pour aller à la page précédente
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Fonction pour aller à la page suivante
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const requestSort = (key: string) => {
     let direction = 'ascending';
@@ -455,10 +483,32 @@ export function Employees() {
         {filteredEmployees.length > 0 ? (
           <div className="space-y-6">
             {/* Results Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <h2 className="text-2xl font-bold text-gray-900">
                 {filteredEmployees.length} employé{filteredEmployees.length > 1 ? 's' : ''} trouvé{filteredEmployees.length > 1 ? 's' : ''}
               </h2>
+              
+              {/* Items per page selector */}
+              <div className="flex items-center gap-3">
+                <Label htmlFor="itemsPerPage" className="text-sm text-gray-600 whitespace-nowrap">
+                  Éléments par page:
+                </Label>
+                <select
+                  id="itemsPerPage"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="h-9 border border-gray-200 rounded-lg px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm"
+                >
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
+              
               {selectedCompany && (
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                   <Building className="h-3 w-3 mr-1" />
@@ -526,7 +576,7 @@ export function Employees() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-100">
-                      {filteredEmployees.map((employee, index) => (
+                      {currentItems.map((employee, index) => (
                         <tr key={employee.id} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-4">
@@ -612,7 +662,7 @@ export function Employees() {
 
             {/* Mobile Cards */}
             <div className="lg:hidden space-y-4">
-              {filteredEmployees.map((employee, index) => (
+              {currentItems.map((employee, index) => (
                 <Card key={employee.id} className="bg-white/80 backdrop-blur-sm border-white/20 shadow-lg hover:shadow-xl transition-all duration-200">
                   <CardContent className="p-0">
                     <div 
@@ -718,6 +768,89 @@ export function Employees() {
                 </Card>
               ))}
             </div>
+
+            {/* Pagination Component */}
+            {totalPages > 1 && (
+              <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl mt-6">
+                <CardContent className="p-6">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-sm text-gray-600">
+                      Affichage de <span className="font-semibold">{indexOfFirstItem + 1}</span> à <span className="font-semibold">
+                        {Math.min(indexOfLastItem, filteredEmployees.length)}
+                      </span> sur <span className="font-semibold">{filteredEmployees.length}</span> employés
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={goToPreviousPage}
+                        disabled={currentPage === 1}
+                        className="h-10 w-10 p-0 rounded-full border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </Button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          // Calcul des numéros de page à afficher
+                          let pageNumber;
+                          if (totalPages <= 5) {
+                            pageNumber = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNumber = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNumber = totalPages - 4 + i;
+                          } else {
+                            pageNumber = currentPage - 2 + i;
+                          }
+                          
+                          return (
+                            <Button
+                              key={pageNumber}
+                              variant={currentPage === pageNumber ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => paginate(pageNumber)}
+                              className={`h-10 w-10 p-0 rounded-full ${
+                                currentPage === pageNumber 
+                                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' 
+                                  : 'border-gray-300 hover:bg-gray-50'
+                              } transition-all duration-200`}
+                            >
+                              {pageNumber}
+                            </Button>
+                          );
+                        })}
+                        
+                        {totalPages > 5 && currentPage < totalPages - 2 && (
+                          <>
+                            <span className="px-2 text-gray-400">...</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => paginate(totalPages)}
+                              className="h-10 w-10 p-0 rounded-full border-gray-300 hover:bg-gray-50 transition-colors"
+                            >
+                              {totalPages}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={goToNextPage}
+                        disabled={currentPage === totalPages}
+                        className="h-10 w-10 p-0 rounded-full border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         ) : (
           <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
@@ -998,4 +1131,4 @@ export function Employees() {
       </Dialog>
     </div>
   );
-} 
+}
